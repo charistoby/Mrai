@@ -63,6 +63,12 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    #chat {
+      scroll-behavior: smooth;
+    }
     /* Custom Scrollbar Styles for the Modern Workspace */
     ::-webkit-scrollbar {
       width: 6px;
@@ -213,11 +219,17 @@
       </div>
 
       <!-- Workspace Footer -->
-      <div class="p-4 border-t border-space-800 bg-space-950 flex items-center justify-between shrink-0">
-        <span class="text-xs text-slate-500">v2.1 Professional</span>
-        <button onclick="openTest()" class="text-xs px-3 py-1.5 rounded-lg bg-accent-violet/20 hover:bg-accent-violet/30 text-accent-violet font-semibold border border-accent-violet/30 transition">
-          📝 Create Test
-        </button>
+      <div class="p-4 border-t border-space-800 bg-space-950 shrink-0">
+        <div class="flex items-center justify-between gap-3">
+          <!-- Small 2 Line Copyright Comment -->
+          <div class="text-[9px] text-slate-500/80 leading-normal font-mono select-none">
+            <div>© 2026 T-tech Institute | All Rights Reserved</div>
+            <div>Founder: T-boy | "Growth is key"</div>
+          </div>
+          <button onclick="openTest()" class="text-xs px-3 py-1.5 rounded-lg bg-accent-violet/20 hover:bg-accent-violet/30 text-accent-violet font-semibold border border-accent-violet/30 transition shrink-0">
+            📝 Create Test
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -229,7 +241,7 @@
         <div class="flex items-center gap-3">
           <!-- Sidebar/Menu Toggle Button (Always visible on all screens) -->
           <button id="sidebarToggle" onclick="showAcademicTab()" class="w-10 h-10 rounded-lg border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:bg-space-800 hover:text-white transition" title="View Academic Progression">
-            ☰
+            ⋮
           </button>
           <div>
             <h1 class="font-bold text-base text-white tracking-tight flex items-center gap-2">
@@ -248,12 +260,12 @@
 
           <!-- System Menu -->
           <button id="menuBtn" class="w-10 h-10 rounded-lg border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:bg-space-800 hover:text-white transition" title="More Actions">
-            ⋮
+            ☰
           </button>
         </div>
 
         <!-- DROP-DOWN MENU BOX -->
-        <div id="menuBox" class="absolute top-14 right-4 w-52 bg-space-900 border border-space-800 rounded-xl hidden flex-col shadow-2xl z-50 overflow-hidden glow-blue">
+        <div id="menuBox" class="absolute top-14 right-4 w-52 bg-space-900 border border-space-800 rounded-xl flex flex-col shadow-2xl z-50 overflow-hidden glow-blue opacity-0 pointer-events-none scale-95 origin-top-right transition-all duration-250 ease-out">
           <div class="px-4 py-2.5 border-b border-space-800 bg-space-950 text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Actions
           </div>
@@ -266,7 +278,8 @@
           <button onclick="openGal()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
             🖼️ Upload File
           </button>
-          <!-- Interactive Floating-Style Student ID Card Badge -->
+          
+          <!-- Interactive Floating-Style Student ID Card Badge (Cleaned) -->
           <div class="p-2 border-b border-space-800 bg-space-950/40">
             <div onclick="openStudentIdModal()" class="group cursor-pointer relative overflow-hidden rounded-xl border border-accent-blue/25 bg-gradient-to-br from-space-900 to-space-950 p-2.5 transition duration-200 hover:border-accent-blue/50 hover:scale-[1.01] active:scale-[0.99] shadow-lg select-none">
               <!-- Holographic scanline shimmer -->
@@ -287,15 +300,27 @@
                   </div>
                   <div class="flex items-center justify-between">
                     <span id="menuIdNo" class="text-[8px] text-accent-blue font-mono font-medium block">ID: MRAI-5942-STU</span>
-                    <span id="menuAssimTag" class="text-[7px] text-accent-emerald font-mono font-bold bg-accent-emerald/10 border border-accent-emerald/20 px-1 rounded">🐢 Bite-Sized</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <button onclick="toggleSlow()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
-            🐢 Slow Pace
-          </button>
+
+          <!-- Interactive Pace SelectorDropdown -->
+          <div class="px-4 py-2 border-b border-space-800 bg-space-950/20 flex flex-col gap-1.5">
+            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block font-mono">Teaching Pace</span>
+            <div class="relative">
+              <select id="paceSelector" onchange="changePace(this.value)" class="w-full h-8 pl-2 pr-6 rounded bg-space-850 border border-space-800 text-[11px] text-slate-300 focus:outline-none focus:border-accent-blue transition cursor-pointer appearance-none font-mono">
+                <option value="default">🌐 Default Pace</option>
+                <option value="slow">🐢 Slow Pace</option>
+                <option value="moderate">💡 Moderate Pace</option>
+                <option value="advanced">⚡ Advanced Pace</option>
+                <option value="fast">🚀 Fast Pace</option>
+              </select>
+              <div class="absolute inset-y-0 right-2 flex items-center pointer-events-none text-slate-500 text-[8px]">▼</div>
+            </div>
+          </div>
+
           <button onclick="clearChat()" class="text-left px-4 py-2.5 text-xs text-accent-rose hover:bg-accent-rose/10 transition flex items-center gap-2 font-semibold">
             🗑️ Clear Chat
           </button>
@@ -309,37 +334,45 @@
 
       <!-- COMPOSER AREA -->
       <div class="p-4 bg-space-900 border-t border-space-800 z-10">
-        <div class="max-w-4xl mx-auto flex items-center gap-3 relative">
-          
-          <!-- Attachment shortcuts -->
-          <div class="flex items-center gap-1.5">
-            <button onclick="openCam()" class="w-11 h-11 rounded-xl border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:border-space-700 hover:bg-space-800 hover:text-white transition" title="Take photo from camera">
-              📸
-            </button>
-            <button onclick="openGal()" class="w-11 h-11 rounded-xl border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:border-space-700 hover:bg-space-800 hover:text-white transition" title="Upload from file explorer">
-              🖼️
-            </button>
-          </div>
-
-          <!-- Input input text area -->
-          <div class="flex-1 relative">
-            <input id="msg" type="text" placeholder="Ask a physics formula, math equation, or chemistry stoichiometry problem..." autocomplete="off" class="w-full h-11 pl-4 pr-12 rounded-xl border border-space-800 bg-space-950 text-white placeholder-slate-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/15 font-sans text-sm transition">
+        <div class="max-w-4xl mx-auto flex flex-col gap-3">
+          <div class="flex items-center gap-3 relative w-full">
             
-            <!-- Voice speech input button -->
-            <button id="micBtn" class="absolute right-2 top-1.5 w-8 h-8 rounded-lg flex items-center justify-center bg-transparent hover:bg-space-850 text-slate-400 hover:text-white transition" title="Tap to dictate question">
-              🎤
+            <!-- Attachment shortcuts -->
+            <div class="flex items-center gap-1.5">
+              <button onclick="openCam()" class="w-11 h-11 rounded-xl border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:border-space-700 hover:bg-space-800 hover:text-white transition" title="Take photo from camera">
+                📸
+              </button>
+              <button onclick="openGal()" class="w-11 h-11 rounded-xl border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:border-space-700 hover:bg-space-800 hover:text-white transition" title="Upload from file explorer">
+                🖼️
+              </button>
+            </div>
+
+            <!-- Input input text area -->
+            <div class="flex-1 relative">
+              <input id="msg" type="text" placeholder="Ask a physics formula, math equation, or chemistry stoichiometry problem..." autocomplete="off" class="w-full h-11 pl-4 pr-12 rounded-xl border border-space-800 bg-space-950 text-white placeholder-slate-500 focus:outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue/15 font-sans text-sm transition">
+              
+              <!-- Voice speech input button -->
+              <button id="micBtn" class="absolute right-2 top-1.5 w-8 h-8 rounded-lg flex items-center justify-center bg-transparent hover:bg-space-850 text-slate-400 hover:text-white transition" title="Tap to dictate question">
+                🎤
+              </button>
+            </div>
+
+            <!-- Hidden File Inputs -->
+            <input type="file" id="camI" accept="image/*" capture="environment" class="hidden">
+            <input type="file" id="galI" accept="image/*" multiple class="hidden">
+            <input type="file" id="thI" accept="image/*" multiple class="hidden">
+
+            <!-- Submit button -->
+            <button onclick="send()" class="w-11 h-11 rounded-xl bg-gradient-to-r from-accent-blue to-accent-violet hover:from-accent-blue/90 hover:to-accent-violet/90 flex items-center justify-center text-white shadow-lg shadow-accent-blue/15 hover:shadow-accent-blue/25 transition">
+              <span class="text-sm font-semibold">➤</span>
             </button>
           </div>
 
-          <!-- Hidden File Inputs -->
-          <input type="file" id="camI" accept="image/*" capture="environment" class="hidden">
-          <input type="file" id="galI" accept="image/*" multiple class="hidden">
-          <input type="file" id="thI" accept="image/*" multiple class="hidden">
-
-          <!-- Submit button -->
-          <button onclick="send()" class="w-11 h-11 rounded-xl bg-gradient-to-r from-accent-blue to-accent-violet hover:from-accent-blue/90 hover:to-accent-violet/90 flex items-center justify-center text-white shadow-lg shadow-accent-blue/15 hover:shadow-accent-blue/25 transition">
-            <span class="text-sm font-semibold">➤</span>
-          </button>
+          <!-- Professional Copyright & Motto on Main Page (Small 2 Line Comment) -->
+          <div class="text-[9px] text-slate-500/80 leading-normal font-mono text-center select-none pt-2 border-t border-space-800/40">
+            <div>© 2026 T-tech Institute | All Rights Reserved</div>
+            <div>Founder: T-boy | "Growth is key"</div>
+          </div>
         </div>
       </div>
     </main>
@@ -452,10 +485,6 @@
                 <span id="previewEmail" class="text-[10px] text-slate-400 truncate block font-mono">lichianukem6@gmail.com</span>
                 <span id="previewIdNo" class="text-[9px] text-accent-blue font-mono font-medium block">ID: MRAI-5942-STU</span>
               </div>
-            </div>
-            <div class="mt-3 pt-2.5 border-t border-space-800/80 flex flex-wrap gap-1.5 justify-between items-center text-[9px]">
-              <span id="previewClassTag" class="text-slate-400 font-mono bg-space-950 px-2 py-0.5 rounded border border-space-800">🏫 SSS / High School</span>
-              <span id="previewAssimTag" class="text-accent-emerald font-mono bg-accent-emerald/10 border border-accent-emerald/30 px-2 py-0.5 rounded">🐢 Bite-Sized</span>
             </div>
           </div>
         </div>
@@ -665,10 +694,28 @@
       if (statsSolvedEl) statsSolvedEl.textContent = memory.solved || 0;
       if (statsStreakEl) statsStreakEl.textContent = `${memory.streak || 1} day` + (memory.streak > 1 ? 's' : '');
       if (paceBadgeEl) {
-        paceBadgeEl.textContent = memory.pace === 'slow' ? '🐢 Slow Pace' : 'Normal Pace';
-        paceBadgeEl.className = memory.pace === 'slow'
-          ? "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-rose/15 text-accent-rose border border-accent-rose/30"
-          : "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-blue/15 text-accent-blue border border-accent-blue/30";
+        const pace = memory.pace || 'default';
+        if (pace === 'slow') {
+          paceBadgeEl.textContent = '🐢 Slow Pace';
+          paceBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-rose/15 text-accent-rose border border-accent-rose/30 font-mono";
+        } else if (pace === 'moderate') {
+          paceBadgeEl.textContent = '💡 Moderate Pace';
+          paceBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-emerald/15 text-accent-emerald border border-accent-emerald/30 font-mono";
+        } else if (pace === 'advanced') {
+          paceBadgeEl.textContent = '⚡ Advanced Pace';
+          paceBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-violet/15 text-accent-violet border border-accent-violet/30 font-mono";
+        } else if (pace === 'fast') {
+          paceBadgeEl.textContent = '🚀 Fast Pace';
+          paceBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30 font-mono";
+        } else {
+          paceBadgeEl.textContent = '🌐 Default Pace';
+          paceBadgeEl.className = "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-blue/15 text-accent-blue border border-accent-blue/30 font-mono";
+        }
+      }
+
+      const pSel = document.getElementById('paceSelector');
+      if (pSel) {
+        pSel.value = memory.pace || 'default';
       }
 
       // Update student email profile display
@@ -780,7 +827,7 @@
 
     // Student ID Card Modal Controllers
     function openStudentIdModal() {
-      menuBox.classList.add('hidden');
+      toggleMenu(false);
       const modal = document.getElementById('studentIdM');
       if (modal) {
         modal.classList.remove('hidden');
@@ -931,7 +978,7 @@
 
     // Modal Control
     function openTest() {
-      menuBox.classList.add('hidden');
+      toggleMenu(false);
       document.getElementById('testM').classList.remove('hidden');
       document.getElementById('testM').classList.add('flex');
       setT('obj');
@@ -984,23 +1031,50 @@
       }, 1500);
     }
 
+    function toggleMenu(show) {
+      const mBox = document.getElementById('menuBox');
+      if (!mBox) return;
+      if (show === undefined) {
+        show = mBox.classList.contains('opacity-0');
+      }
+      if (show) {
+        mBox.classList.remove('opacity-0', 'pointer-events-none', 'scale-95');
+        mBox.classList.add('opacity-100', 'pointer-events-auto', 'scale-100');
+      } else {
+        mBox.classList.add('opacity-0', 'pointer-events-none', 'scale-95');
+        mBox.classList.remove('opacity-100', 'pointer-events-auto', 'scale-100');
+      }
+    }
+
     function openCam() {
-      menuBox.classList.add('hidden');
+      toggleMenu(false);
       document.getElementById('camI').click();
     }
 
     function openGal() {
-      menuBox.classList.add('hidden');
+      toggleMenu(false);
       document.getElementById('galI').click();
     }
 
-    function toggleSlow() {
-      menuBox.classList.add('hidden');
-      memory.pace = (memory.pace === 'slow') ? 'normal' : 'slow';
+    function changePace(newPace) {
+      toggleMenu(false);
+      memory.pace = newPace;
+      localStorage.setItem('mrai_pro', JSON.stringify(memory));
       updateDashboard();
-      addMsg(memory.pace === 'slow' 
-        ? '🐢 **Slow Pace Activated.** I will break down math problems, formulas, and chemistry questions into small, bite-sized explanatory steps.' 
-        : '🚀 **Normal Pace Activated.** I will write comprehensive, fully complete calculations directly.', 'bot');
+      
+      let paceMsg = '';
+      if (newPace === 'slow') {
+        paceMsg = '🐢 **Slow Pace Activated.** I will break down math problems, formulas, and chemistry questions into highly deliberate, small, bite-sized explanatory steps. Ask confirming questions after each calculation step.';
+      } else if (newPace === 'moderate') {
+        paceMsg = '💡 **Moderate Pace Activated.** I will teach with clear, steady explanations, focusing on deep intuitive understanding of calculation rules.';
+      } else if (newPace === 'advanced') {
+        paceMsg = '⚡ **Advanced Pace Activated.** I will jump directly to formulas and algebraic transformations, skipping simple arithmetic to focus on complex proof and calculations.';
+      } else if (newPace === 'fast') {
+        paceMsg = '🚀 **Fast Pace Activated.** I will provide extremely rapid calculation pathways, skipping details to get you the final answers and formulas instantly.';
+      } else {
+        paceMsg = '🌐 **Default Pace Activated.** I will explain calculation steps standardly, with general balanced depth.';
+      }
+      addMsg(paceMsg, 'bot');
     }
 
     // Visual Message Injector
@@ -1633,12 +1707,12 @@
       // Menu Toggle Listener
       menuBtn.onclick = (e) => {
         e.stopPropagation();
-        menuBox.classList.toggle('hidden');
+        toggleMenu();
       };
       
       document.addEventListener('click', e => {
         if (!e.target.closest('#menuBtn') && !e.target.closest('#menuBox')) {
-          menuBox.classList.add('hidden');
+          toggleMenu(false);
         }
       });
 

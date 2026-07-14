@@ -128,32 +128,41 @@
 
       <!-- Student Profile & Progression Panel (Evenly split 50-50 with the curriculum launch area) -->
       <div class="p-6 border-b border-space-800 flex-1 overflow-y-auto space-y-6 flex flex-col justify-center min-h-0">
-        <!-- Student Profile Card (Editable Email) -->
+        <!-- Holographic Student ID Card Badge (Interactive) -->
         <div class="space-y-2">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Student Profile</span>
-          
-          <!-- View Email Area -->
-          <div id="emailDisplayArea" class="flex items-center justify-between bg-space-850 bg-opacity-40 p-4 rounded-xl border border-space-800">
-            <div class="min-w-0 flex-1">
-              <span class="text-[9px] text-slate-500 uppercase tracking-wider block font-mono">Current User</span>
-              <span id="studentEmailVal" class="text-xs font-mono text-white font-medium truncate block">lichianukem6@gmail.com</span>
-            </div>
-            <button onclick="enableEmailEdit()" class="text-[10px] text-accent-blue hover:underline font-semibold ml-2 shrink-0" title="Edit logged in email address">
-              ✏️ Change
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block font-mono">Student Profile ID</span>
+            <button onclick="openStudentIdModal()" class="text-[10px] text-accent-blue hover:underline font-semibold font-mono" title="Edit Student ID details">
+              ✏️ Edit Card
             </button>
           </div>
-
-          <!-- Edit Email Area -->
-          <div id="emailEditArea" class="hidden flex-col gap-2 bg-space-850 bg-opacity-45 p-4 rounded-xl border border-space-700">
-            <span class="text-[9px] text-slate-400 uppercase tracking-wider font-mono">Enter New Email Address</span>
-            <div class="flex items-center gap-1.5">
-              <input id="emailInput" type="email" class="flex-1 h-9 px-3 rounded bg-space-950 border border-space-800 text-xs text-white focus:outline-none focus:border-accent-blue font-mono" placeholder="student@email.com">
-              <button onclick="saveStudentEmail()" class="h-9 w-9 rounded bg-accent-emerald text-white text-xs font-bold flex items-center justify-center hover:opacity-90" title="Save changes">
-                ✓
-              </button>
-              <button onclick="cancelEmailEdit()" class="h-9 w-9 rounded bg-space-800 border border-space-700 text-slate-400 text-xs font-bold flex items-center justify-center hover:text-white" title="Cancel">
-                ✕
-              </button>
+          
+          <div onclick="openStudentIdModal()" class="cursor-pointer relative overflow-hidden rounded-2xl border border-space-800 bg-gradient-to-br from-space-900 via-space-850 to-space-900 p-4 transition-all hover:border-accent-blue/50 group shadow-lg glow-blue hover:scale-[1.01] active:scale-[0.99] select-none">
+            <!-- Shimmer effect -->
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/10 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+            
+            <div class="flex gap-3 items-center">
+              <!-- Avatar Slot -->
+              <div class="w-12 h-12 rounded-xl border border-space-700 bg-space-950 flex flex-col items-center justify-center relative overflow-hidden shrink-0">
+                <span id="cardAvatarIcon" class="text-xl">🎓</span>
+                <span id="cardAgeTag" class="absolute bottom-0 inset-x-0 bg-accent-blue/20 border-t border-accent-blue/30 text-[8px] font-bold text-center text-accent-blue py-0.5 font-mono">17 yrs</span>
+              </div>
+              
+              <!-- Core Info -->
+              <div class="min-w-0 flex-1 space-y-0.5">
+                <div class="flex items-center justify-between gap-1">
+                  <span id="cardName" class="text-xs font-bold text-white truncate block">T-boy</span>
+                  <span id="cardGenderTag" class="text-[8px] px-1 py-0.2 rounded bg-space-800 text-slate-400 font-mono scale-90">MALE</span>
+                </div>
+                <span id="cardEmail" class="text-[9px] text-slate-400 truncate block font-mono">lichianukem6@gmail.com</span>
+                <span id="cardIdNo" class="text-[9px] text-accent-blue font-mono font-medium block">ID: MRAI-5942-STU</span>
+              </div>
+            </div>
+            
+            <!-- Tags footer -->
+            <div class="mt-3 pt-2 border-t border-space-800/60 flex flex-wrap gap-1.5 justify-between items-center text-[9px]">
+              <span id="cardClassTag" class="text-slate-400 font-mono bg-space-950 px-1.5 py-0.5 rounded border border-space-800 truncate max-w-[120px]">🏫 High School / SSS</span>
+              <span id="cardAssimTag" class="text-accent-emerald font-mono bg-accent-emerald/10 border border-accent-emerald/30 px-1.5 py-0.5 rounded truncate">🐢 Bite-Sized</span>
             </div>
           </div>
         </div>
@@ -263,6 +272,33 @@
           <button onclick="openGal()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
             🖼️ Upload File
           </button>
+          <!-- Interactive Floating-Style Student ID Card Badge -->
+          <div class="p-2 border-b border-space-800 bg-space-950/40">
+            <div onclick="openStudentIdModal()" class="group cursor-pointer relative overflow-hidden rounded-xl border border-accent-blue/25 bg-gradient-to-br from-space-900 to-space-950 p-2.5 transition duration-200 hover:border-accent-blue/50 hover:scale-[1.01] active:scale-[0.99] shadow-lg select-none">
+              <!-- Holographic scanline shimmer -->
+              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/10 to-transparent -translate-x-full group-hover:animate-shimmer pointer-events-none"></div>
+              
+              <div class="flex gap-2 items-center">
+                <!-- Avatar icon with mini age tag -->
+                <div class="w-9 h-9 rounded-lg border border-space-700 bg-space-950 flex flex-col items-center justify-center relative overflow-hidden shrink-0">
+                  <span id="menuAvatarIcon" class="text-base">🎓</span>
+                  <span id="menuAgeTag" class="absolute bottom-0 inset-x-0 bg-accent-blue/20 border-t border-accent-blue/30 text-[7px] font-bold text-center text-accent-blue py-0.2 font-mono">17 yrs</span>
+                </div>
+                
+                <!-- Info details -->
+                <div class="min-w-0 flex-1 space-y-0.5">
+                  <div class="flex items-center justify-between gap-1">
+                    <span id="menuName" class="text-[11px] font-bold text-white truncate block">T-boy</span>
+                    <span id="menuGenderTag" class="text-[7px] px-1 py-0.2 rounded bg-space-800 text-slate-400 font-mono scale-90">MALE</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span id="menuIdNo" class="text-[8px] text-accent-blue font-mono font-medium block">ID: MRAI-5942-STU</span>
+                    <span id="menuAssimTag" class="text-[7px] text-accent-emerald font-mono font-bold bg-accent-emerald/10 border border-accent-emerald/20 px-1 rounded">🐢 Bite-Sized</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <button onclick="toggleSlow()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
             🐢 Slow Pace
           </button>
@@ -385,6 +421,141 @@
     </div>
   </div>
 
+  <!-- MODAL: STUDENT ID CARD WRITER -->
+  <div id="studentIdM" class="fixed inset-0 bg-space-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-[80] transition-all">
+    <div class="w-full max-w-md bg-space-900 border border-space-800 rounded-2xl shadow-2xl overflow-hidden glow-blue flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-space-950 border-b border-space-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🪪</span>
+          <h3 class="font-bold text-sm text-white uppercase tracking-wider">Configure Student ID</h3>
+        </div>
+        <button onclick="closeStudentIdModal()" class="text-slate-500 hover:text-slate-300 transition text-lg">✕</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 space-y-5 overflow-y-auto flex-1 min-h-0 select-none">
+        <p class="text-xs text-slate-400">Update your student identity profile below. This configuration dictates how MR.AI teaches, adapts formulas, and selects explanations for your level of assimilation.</p>
+        
+        <!-- Live Preview of Card in Modal -->
+        <div class="p-4 rounded-xl border border-space-800 bg-space-950/50 flex flex-col items-center justify-center">
+          <span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-2">LIVE ID CARD PREVIEW</span>
+          
+          <!-- ID Card Component -->
+          <div class="w-full relative overflow-hidden rounded-2xl border border-accent-blue/30 bg-gradient-to-br from-space-900 via-space-850 to-space-900 p-4 shadow-xl glow-blue">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-accent-blue/5 to-transparent pointer-events-none"></div>
+            <div class="flex gap-3 items-center">
+              <div class="w-14 h-14 rounded-xl border border-space-700 bg-space-950 flex flex-col items-center justify-center relative overflow-hidden shrink-0">
+                <span id="previewAvatarIcon" class="text-2xl">🎓</span>
+                <span id="previewAgeTag" class="absolute bottom-0 inset-x-0 bg-accent-blue/20 border-t border-accent-blue/30 text-[8px] font-bold text-center text-accent-blue py-0.5 font-mono">17 yrs</span>
+              </div>
+              <div class="min-w-0 flex-1 space-y-1">
+                <div class="flex items-center justify-between gap-1">
+                  <span id="previewName" class="text-xs font-bold text-white truncate block">T-boy</span>
+                  <span id="previewGenderTag" class="text-[8px] px-1.5 py-0.2 rounded bg-space-800 text-slate-400 font-mono">MALE</span>
+                </div>
+                <span id="previewEmail" class="text-[10px] text-slate-400 truncate block font-mono">lichianukem6@gmail.com</span>
+                <span id="previewIdNo" class="text-[9px] text-accent-blue font-mono font-medium block">ID: MRAI-5942-STU</span>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-space-800/80 flex flex-wrap gap-1.5 justify-between items-center text-[9px]">
+              <span id="previewClassTag" class="text-slate-400 font-mono bg-space-950 px-2 py-0.5 rounded border border-space-800">🏫 SSS / High School</span>
+              <span id="previewAssimTag" class="text-accent-emerald font-mono bg-accent-emerald/10 border border-accent-emerald/30 px-2 py-0.5 rounded">🐢 Bite-Sized</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Forms -->
+        <div class="space-y-3.5">
+          <!-- Name Input -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Student Name</label>
+            <input id="formName" type="text" oninput="syncPreview()" placeholder="Enter your name..." class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-white text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+          </div>
+
+          <!-- Email Input -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Email Address</label>
+            <input id="formEmail" type="email" oninput="syncPreview()" placeholder="Enter email..." class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-white text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Gender Dropdown -->
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Gender</label>
+              <select id="formGender" onchange="syncPreview()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+                <option value="Male">👨 Male</option>
+                <option value="Female">👩 Female</option>
+                <option value="Non-binary">🏳️‍🌈 Non-binary</option>
+                <option value="N/A">🤫 Prefer not to say</option>
+              </select>
+            </div>
+
+            <!-- Age Input -->
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Age (Years)</label>
+              <input id="formAge" type="number" oninput="syncPreview()" min="5" max="100" placeholder="e.g. 17" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-white text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-3.5">
+            <!-- Academic Class / Grade Level -->
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Academic Class / Level</label>
+              <select id="formClassLevel" onchange="syncPreview()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+                <option value="Junior High School">🎒 Junior High School</option>
+                <option value="High School / SSS">🏫 Senior High / SSS</option>
+                <option value="Undergrad (Year 1-2)">🎓 College/Undergrad (Yr 1-2)</option>
+                <option value="Undergrad (Year 3-4)">🎓 College/Undergrad (Yr 3-4)</option>
+                <option value="Postgraduate / Researcher">🧬 Postgrad / Researcher</option>
+              </select>
+            </div>
+
+            <!-- Learning Style / Assimilation Mode -->
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Assimilation & Explanation Style</label>
+              <select id="formAssimilation" onchange="syncPreview()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200 font-mono">
+                <option value="Bite-Sized & Step-by-Step">🐢 Bite-Sized & Step-by-Step</option>
+                <option value="Visual Analogies & Examples">💡 Visual Analogies & Examples</option>
+                <option value="Formula-Dense & Rigorous">⚡ Formula-Dense & Rigorous</option>
+                <option value="Normal / Balanced pacing">🌐 Balanced & Standard Pacing</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Avatar Icon selection -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">ID Card Avatar Symbol</label>
+            <div class="grid grid-cols-6 gap-2">
+              <button onclick="setAvatarSymbol('🎓')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">🎓</button>
+              <button onclick="setAvatarSymbol('⚡')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">⚡</button>
+              <button onclick="setAvatarSymbol('🧪')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">🧪</button>
+              <button onclick="setAvatarSymbol('📐')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">📐</button>
+              <button onclick="setAvatarSymbol('🧠')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">🧠</button>
+              <button onclick="setAvatarSymbol('🤖')" class="h-9 rounded bg-space-950 border border-space-800 hover:border-accent-blue text-sm flex items-center justify-center">🤖</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="px-5 py-3.5 bg-space-950 border-t border-space-800 flex justify-between shrink-0">
+        <button onclick="regenerateIdNumber()" class="px-3 py-2 text-[10px] font-mono rounded bg-space-800 border border-space-750 text-accent-blue hover:bg-space-700 transition">
+          🔄 Regen ID No
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeStudentIdModal()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-space-800 text-slate-300 hover:bg-space-700 transition">
+            Cancel
+          </button>
+          <button onclick="saveStudentId()" class="px-4 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-accent-blue to-accent-violet hover:opacity-90 text-white transition">
+            Save ID Card
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: CURRICULUM TOPICS EXPLORER -->
   <div id="curriculumM" class="fixed inset-0 bg-space-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-[80] transition-all">
     <div class="w-full max-w-xl bg-space-900 border border-space-800 rounded-2xl shadow-2xl overflow-hidden glow-blue flex flex-col max-h-[85vh]">
@@ -442,10 +613,19 @@
   <!-- JAVASCRIPT APP LOGIC -->
   <script>
     // App State Manager
-    let memory = JSON.parse(localStorage.getItem('mrai_pro') || '{"pace": "normal", "solved": 0, "streak": 1, "lastSolvedDate": "", "userEmail": "lichianukem6@gmail.com"}');
+    let memory = JSON.parse(localStorage.getItem('mrai_pro') || '{}');
     memory.userEmail = memory.userEmail || "lichianukem6@gmail.com";
+    memory.studentName = memory.studentName || "T-boy";
+    memory.gender = memory.gender || "Male";
+    memory.classLevel = memory.classLevel || "High School / SSS";
+    memory.age = memory.age || 17;
+    memory.assimilation = memory.assimilation || "Bite-Sized & Step-by-Step";
+    memory.idNo = memory.idNo || "MRAI-5942-STU";
+    memory.avatar = memory.avatar || "🎓";
     memory.solved = memory.solved || 0;
     memory.streak = memory.streak || 1;
+    memory.pace = memory.pace || "normal";
+    memory.lastSolvedDate = memory.lastSolvedDate || "";
     
     let history = [];
     let cur = {};
@@ -523,39 +703,224 @@
       if (progressionBarEl) {
         progressionBarEl.style.width = `${barProgressPercent}%`;
       }
-    }
 
-    // Editable Student Email operations
-    function enableEmailEdit() {
-      if (emailDisplayAreaEl && emailEditAreaEl && emailInputEl) {
-        emailInputEl.value = memory.userEmail || "lichianukem6@gmail.com";
-        emailDisplayAreaEl.classList.add('hidden');
-        emailEditAreaEl.classList.remove('hidden');
-        emailEditAreaEl.classList.add('flex');
-      }
-    }
+      // Update Holographic Student ID Card Sidebar elements
+      const cardName = document.getElementById('cardName');
+      const cardEmail = document.getElementById('cardEmail');
+      const cardIdNo = document.getElementById('cardIdNo');
+      const cardGenderTag = document.getElementById('cardGenderTag');
+      const cardAgeTag = document.getElementById('cardAgeTag');
+      const cardClassTag = document.getElementById('cardClassTag');
+      const cardAssimTag = document.getElementById('cardAssimTag');
+      const cardAvatarIcon = document.getElementById('cardAvatarIcon');
 
-    function cancelEmailEdit() {
-      if (emailDisplayAreaEl && emailEditAreaEl) {
-        emailEditAreaEl.classList.add('hidden');
-        emailEditAreaEl.classList.remove('flex');
-        emailDisplayAreaEl.classList.remove('hidden');
-      }
-    }
-
-    function saveStudentEmail() {
-      if (emailInputEl) {
-        const value = emailInputEl.value.trim();
-        if (!value || !value.includes('@')) {
-          alert('Please input a valid email address!');
-          return;
+      if (cardName) cardName.textContent = memory.studentName || "T-boy";
+      if (cardEmail) cardEmail.textContent = memory.userEmail || "lichianukem6@gmail.com";
+      if (cardIdNo) cardIdNo.textContent = `ID: ${memory.idNo || "MRAI-5942-STU"}`;
+      if (cardGenderTag) {
+        cardGenderTag.textContent = (memory.gender || "Male").toUpperCase();
+        if (memory.gender === 'Female') {
+          cardGenderTag.className = "text-[8px] px-1 py-0.2 rounded font-mono scale-90 bg-accent-rose/25 text-accent-rose";
+        } else if (memory.gender === 'Non-binary') {
+          cardGenderTag.className = "text-[8px] px-1 py-0.2 rounded font-mono scale-90 bg-accent-violet/25 text-accent-violet";
+        } else {
+          cardGenderTag.className = "text-[8px] px-1 py-0.2 rounded font-mono scale-90 bg-space-800 text-slate-400";
         }
-        memory.userEmail = value;
-        localStorage.setItem('mrai_pro', JSON.stringify(memory));
-        updateDashboard();
-        cancelEmailEdit();
-        addMsg(`👤 **Profile Updated:** Student email is successfully configured to **${value}**.\n\nAll subsequent academic metrics will be securely saved under this profile.`, 'bot');
       }
+      if (cardAgeTag) cardAgeTag.textContent = `${memory.age || 17} yrs`;
+      if (cardClassTag) {
+        cardClassTag.textContent = `🏫 ${memory.classLevel || "High School"}`;
+        cardClassTag.title = memory.classLevel || "High School";
+      }
+      if (cardAssimTag) {
+        const assim = memory.assimilation || "Bite-Sized & Step-by-Step";
+        cardAssimTag.textContent = assim.split(' ')[0] + " " + assim.replace(/🐢|💡|⚡|🌐/g, '').trim();
+        if (assim.includes('Bite-Sized')) {
+          cardAssimTag.className = "font-mono bg-accent-emerald/10 border border-accent-emerald/30 text-accent-emerald px-1.5 py-0.5 rounded truncate";
+        } else if (assim.includes('Visual')) {
+          cardAssimTag.className = "font-mono bg-accent-violet/10 border border-accent-violet/30 text-accent-violet px-1.5 py-0.5 rounded truncate";
+        } else if (assim.includes('Formula')) {
+          cardAssimTag.className = "font-mono bg-accent-rose/10 border border-accent-rose/30 text-accent-rose px-1.5 py-0.5 rounded truncate";
+        } else {
+          cardAssimTag.className = "font-mono bg-accent-blue/10 border border-accent-blue/30 text-accent-blue px-1.5 py-0.5 rounded truncate";
+        }
+      }
+      if (cardAvatarIcon) cardAvatarIcon.textContent = memory.avatar || "🎓";
+
+      // Update Menu Floating ID Card elements
+      const mName = document.getElementById('menuName');
+      const mIdNo = document.getElementById('menuIdNo');
+      const mGenderTag = document.getElementById('menuGenderTag');
+      const mAgeTag = document.getElementById('menuAgeTag');
+      const mAssimTag = document.getElementById('menuAssimTag');
+      const mAvatarIcon = document.getElementById('menuAvatarIcon');
+
+      if (mName) mName.textContent = memory.studentName || "T-boy";
+      if (mIdNo) mIdNo.textContent = `ID: ${memory.idNo || "MRAI-5942-STU"}`;
+      if (mGenderTag) {
+        mGenderTag.textContent = (memory.gender || "Male").toUpperCase();
+        if (memory.gender === 'Female') {
+          mGenderTag.className = "text-[7px] px-1 py-0.2 rounded font-mono scale-90 bg-accent-rose/25 text-accent-rose";
+        } else if (memory.gender === 'Non-binary') {
+          mGenderTag.className = "text-[7px] px-1 py-0.2 rounded font-mono scale-90 bg-accent-violet/25 text-accent-violet";
+        } else {
+          mGenderTag.className = "text-[7px] px-1 py-0.2 rounded font-mono scale-90 bg-space-800 text-slate-400";
+        }
+      }
+      if (mAgeTag) mAgeTag.textContent = `${memory.age || 17} yrs`;
+      if (mAssimTag) {
+        const assim = memory.assimilation || "Bite-Sized & Step-by-Step";
+        mAssimTag.textContent = assim.split(' ')[0] + " " + assim.replace(/🐢|💡|⚡|🌐/g, '').trim();
+        if (assim.includes('Bite-Sized')) {
+          mAssimTag.className = "text-[7px] font-mono bg-accent-emerald/10 border border-accent-emerald/20 text-accent-emerald px-1 rounded truncate";
+        } else if (assim.includes('Visual')) {
+          mAssimTag.className = "text-[7px] font-mono bg-accent-violet/10 border border-accent-violet/20 text-accent-violet px-1 rounded truncate";
+        } else if (assim.includes('Formula')) {
+          mAssimTag.className = "text-[7px] font-mono bg-accent-rose/10 border border-accent-rose/20 text-accent-rose px-1 rounded truncate";
+        } else {
+          mAssimTag.className = "text-[7px] font-mono bg-accent-blue/10 border border-accent-blue/20 text-accent-blue px-1 rounded truncate";
+        }
+      }
+      if (mAvatarIcon) mAvatarIcon.textContent = memory.avatar || "🎓";
+    }
+
+    // Student ID Card Modal Controllers
+    function openStudentIdModal() {
+      menuBox.classList.add('hidden');
+      const modal = document.getElementById('studentIdM');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      // Load values into form fields from memory
+      document.getElementById('formName').value = memory.studentName || "T-boy";
+      document.getElementById('formEmail').value = memory.userEmail || "lichianukem6@gmail.com";
+      document.getElementById('formGender').value = memory.gender || "Male";
+      document.getElementById('formAge').value = memory.age || 17;
+      document.getElementById('formClassLevel').value = memory.classLevel || "High School / SSS";
+      document.getElementById('formAssimilation').value = memory.assimilation || "Bite-Sized & Step-by-Step";
+      
+      syncPreview();
+    }
+
+    function closeStudentIdModal() {
+      const modal = document.getElementById('studentIdM');
+      if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      }
+    }
+
+    // Sync live ID card preview inside modal
+    function syncPreview() {
+      const name = document.getElementById('formName').value.trim() || "Student Scholar";
+      const email = document.getElementById('formEmail').value.trim() || "lichianukem6@gmail.com";
+      const gender = document.getElementById('formGender').value;
+      const age = document.getElementById('formAge').value || "17";
+      const classLevel = document.getElementById('formClassLevel').value;
+      const assimilation = document.getElementById('formAssimilation').value;
+      
+      const pName = document.getElementById('previewName');
+      const pEmail = document.getElementById('previewEmail');
+      const pGender = document.getElementById('previewGenderTag');
+      const pAge = document.getElementById('previewAgeTag');
+      const pClass = document.getElementById('previewClassTag');
+      const pAssim = document.getElementById('previewAssimTag');
+
+      if (pName) pName.textContent = name;
+      if (pEmail) pEmail.textContent = email;
+      if (pGender) {
+        pGender.textContent = gender.toUpperCase();
+        if (gender === 'Female') {
+          pGender.className = "text-[8px] px-1.5 py-0.2 rounded font-mono bg-accent-rose/25 text-accent-rose";
+        } else if (gender === 'Non-binary') {
+          pGender.className = "text-[8px] px-1.5 py-0.2 rounded font-mono bg-accent-violet/25 text-accent-violet";
+        } else {
+          pGender.className = "text-[8px] px-1.5 py-0.2 rounded font-mono bg-space-800 text-slate-400";
+        }
+      }
+      if (pAge) pAge.textContent = `${age} yrs`;
+      if (pClass) pClass.textContent = `🏫 ${classLevel.split(' ')[0]}`;
+      
+      if (pAssim) {
+        pAssim.textContent = assimilation.replace(/🐢|💡|⚡|🌐/g, '').trim();
+        if (assimilation.includes('Bite-Sized')) {
+          pAssim.className = "font-mono bg-accent-emerald/10 border border-accent-emerald/30 text-accent-emerald px-2 py-0.5 rounded";
+        } else if (assimilation.includes('Visual')) {
+          pAssim.className = "font-mono bg-accent-violet/10 border border-accent-violet/30 text-accent-violet px-2 py-0.5 rounded";
+        } else if (assimilation.includes('Formula')) {
+          pAssim.className = "font-mono bg-accent-rose/10 border border-accent-rose/30 text-accent-rose px-2 py-0.5 rounded";
+        } else {
+          pAssim.className = "font-mono bg-accent-blue/10 border border-accent-blue/30 text-accent-blue px-2 py-0.5 rounded";
+        }
+      }
+    }
+
+    // Change avatar symbol in card
+    function setAvatarSymbol(sym) {
+      memory.avatar = sym;
+      const cardAvatar = document.getElementById('cardAvatarIcon');
+      const prevAvatar = document.getElementById('previewAvatarIcon');
+      const menuAvatar = document.getElementById('menuAvatarIcon');
+      if (cardAvatar) cardAvatar.textContent = sym;
+      if (prevAvatar) prevAvatar.textContent = sym;
+      if (menuAvatar) menuAvatar.textContent = sym;
+    }
+
+    // Generate unique study ID
+    function regenerateIdNumber() {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      const val = `MRAI-${rand}-STU`;
+      const prevId = document.getElementById('previewIdNo');
+      if (prevId) prevId.textContent = `ID: ${val}`;
+      // Store in transient till save is pressed
+      window._tempIdNo = val;
+    }
+
+    // Save Student ID values
+    function saveStudentId() {
+      const name = document.getElementById('formName').value.trim();
+      const email = document.getElementById('formEmail').value.trim();
+      const gender = document.getElementById('formGender').value;
+      const age = parseInt(document.getElementById('formAge').value, 10) || 17;
+      const classLevel = document.getElementById('formClassLevel').value;
+      const assimilation = document.getElementById('formAssimilation').value;
+
+      if (!name) {
+        alert('Please fill in your name!');
+        return;
+      }
+      if (!email || !email.includes('@')) {
+        alert('Please enter a valid email address!');
+        return;
+      }
+
+      memory.studentName = name;
+      memory.userEmail = email;
+      memory.gender = gender;
+      memory.age = age;
+      memory.classLevel = classLevel;
+      memory.assimilation = assimilation;
+      
+      // Update tempo ID if regenerated
+      if (window._tempIdNo) {
+        memory.idNo = window._tempIdNo;
+        window._tempIdNo = null;
+      }
+
+      // Automatically sync 'slow' pace if Bite-Sized style is chosen
+      if (assimilation.includes('Bite-Sized')) {
+        memory.pace = 'slow';
+      } else {
+        memory.pace = 'normal';
+      }
+
+      localStorage.setItem('mrai_pro', JSON.stringify(memory));
+      updateDashboard();
+      closeStudentIdModal();
+
+      addMsg(`🪪 **Student ID Card Saved:**\n\n- **Name**: ${name}\n- **Class**: ${classLevel}\n- **Assimilation**: ${assimilation}\n\nMR.AI has successfully synced your study profile and is now calibrating calculations for your precise academic stage!`, 'bot');
     }
 
     // Reset Academic Progression

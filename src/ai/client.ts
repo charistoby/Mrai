@@ -13,7 +13,7 @@ export const ai = new GoogleGenAI({
   },
 });
 
-export const DEFAULT_MODEL = "gemini-3.5-flash";
+export const DEFAULT_MODEL = "gemini-1.5-flash";
 
 /**
  * Safely parses JSON strings returned by the LLM. 

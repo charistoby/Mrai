@@ -170,11 +170,36 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Transfer-Encoding", "chunked");
 
+    let studentProfilePrompt = "";
+    if (memory && typeof memory === "object") {
+      const name = memory.studentName || "T-boy";
+      const classLevel = memory.classLevel || "High School / SSS";
+      const age = memory.age || 17;
+      const gender = memory.gender || "Male";
+      const assimilation = memory.assimilation || "Bite-Sized & Step-by-Step";
+      const level = Math.floor((memory.solved || 0) / 10) + 1;
+
+      studentProfilePrompt = `\n\nYou are teaching a student with the following profile:
+- **Student Name**: ${name}
+- **Academic Class/Level**: ${classLevel} (calculated Level ${level})
+- **Age**: ${age} years old
+- **Gender**: ${gender}
+- **Explanation Style**: ${assimilation}
+
+CRITICAL ADAPTATION DIRECTIONS:
+1. Address the student by name ("${name}") occasionally when providing encouragement.
+2. Adapt your explanation complexity, length, and depth to their grade ("${classLevel}"). If Junior High School, keep steps very basic, avoiding complex calculus or terminology, and use simple relatable examples. If Undergraduate or Postgraduate, write with rigorous proofs, advanced formulas, and professional scientific phrasing.
+3. Align your tutoring speed with their Explanation Style ("${assimilation}"):
+   - If "Bite-Sized & Step-by-Step", output one logical micro-step at a time and ask if they are ready for the next one.
+   - If "Visual Analogies & Examples", explain formulas using real-world objects, physics mechanics, and intuitive mental models first.
+   - If "Formula-Dense & Rigorous", skip simple math steps and focus on high-level mathematical formulas and proofs.`;
+    }
+
     const systemInstruction = `You are MR.AI, a highly expert and supportive professional tutor in Mathematics, Further Mathematics, Chemistry, and Physics calculations.
 Guidelines:
 1. Always format mathematical formulas using clean standard TeX inside $...$ (e.g. $y = mx + c$, $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$).
 2. Speak clearly, direct to the point, and friendly.
-3. Be supportive. If the user's pace in memory is 'slow', teach in smaller, bite-sized step-by-step increments.`;
+3. Be supportive. If the user's pace in memory is 'slow', teach in smaller, bite-sized step-by-step increments.${studentProfilePrompt}`;
 
     try {
       const contents = [
@@ -185,13 +210,92 @@ Guidelines:
         { role: "user", parts: [{ text: message }] },
       ];
 
-      const responseStream = await ai.models.generateContentStream({
-        model: DEFAULT_MODEL,
-        contents,
-        config: {
-          systemInstruction,
-        },
-      });
+      // 1. ATTEMPT GROQ STREAMING FIRST (IF API KEY AVAILABLE)
+      if (process.env.GROQ_API_KEY) {
+        try {
+          const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "llama-3.3-70b-specdec",
+              messages: [
+                { role: "system", content: systemInstruction },
+                ...history.map((h: any) => ({
+                  role: h.role === "model" || h.role === "assistant" ? "assistant" : "user",
+                  content: h.content,
+                })),
+                { role: "user", content: message },
+              ],
+              stream: true,
+            }),
+          });
+
+          if (groqResponse.ok && groqResponse.body) {
+            const reader = (groqResponse.body as any).getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+            let done = false;
+            while (!done) {
+              const { value, done: readerDone } = await reader.read();
+              done = readerDone;
+              if (value) {
+                buffer += decoder.decode(value, { stream: !done });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+                for (const line of lines) {
+                  const cleanLine = line.trim();
+                  if (!cleanLine || cleanLine === "data: [DONE]") continue;
+                  if (cleanLine.startsWith("data: ")) {
+                    try {
+                      const json = JSON.parse(cleanLine.substring(6));
+                      const text = json.choices?.[0]?.delta?.content;
+                      if (text) {
+                        res.write(text);
+                      }
+                    } catch (e) {
+                      // ignore parse errors on single lines
+                    }
+                  }
+                }
+              }
+            }
+            res.end();
+            return;
+          } else {
+            console.warn(`Groq streaming request failed with status ${groqResponse.status}. Falling back to Gemini...`);
+          }
+        } catch (groqErr) {
+          console.warn("Groq streaming connection failed, falling back to Gemini:", groqErr);
+        }
+      }
+
+      // 2. MULTI-MODEL GEMINI FALLBACK CASCADE
+      const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+      let responseStream;
+      let lastErr;
+
+      for (const modelName of geminiModels) {
+        try {
+          responseStream = await ai.models.generateContentStream({
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction,
+            },
+          });
+          break; // Successfully connected
+        } catch (streamErr) {
+          lastErr = streamErr;
+          console.warn(`Gemini stream model ${modelName} failed, cycling to next fallback...`, streamErr);
+        }
+      }
+
+      if (!responseStream) {
+        throw lastErr || new Error("All Gemini streaming models exhausted.");
+      }
 
       for await (const chunk of responseStream) {
         if (chunk.text) {
@@ -254,17 +358,65 @@ Return ONLY JSON:
       { role: "user", parts: [{ text: message }] },
     ];
 
-    const response = await ai.models.generateContent({
-      model: DEFAULT_MODEL,
-      contents,
-      config: {
-        systemInstruction,
-        responseMimeType: "application/json",
-      },
-    });
+    let responseText = "";
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-specdec",
+            messages: [
+              { role: "system", content: systemInstruction },
+              ...history.map((h: any) => ({
+                role: h.role === "model" || h.role === "assistant" ? "assistant" : "user",
+                content: h.content,
+              })),
+              { role: "user", content: message },
+            ],
+            response_format: { type: "json_object" },
+          }),
+        });
+        if (groqResponse.ok) {
+          const json = await groqResponse.json();
+          responseText = json.choices?.[0]?.message?.content || "";
+        } else {
+          console.warn(`Groq quiz request failed with status ${groqResponse.status}. Trying Gemini...`);
+        }
+      } catch (groqErr) {
+        console.warn("Groq quiz generation failed, trying Gemini:", groqErr);
+      }
+    }
 
-    const contentText = response.text || "{}";
-    const p = safeParseJSON(contentText);
+    if (!responseText) {
+      const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+      let lastErr;
+      for (const modelName of geminiModels) {
+        try {
+          const resObj = await ai.models.generateContent({
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction,
+              responseMimeType: "application/json",
+            },
+          });
+          responseText = resObj.text || "{}";
+          break;
+        } catch (genErr) {
+          lastErr = genErr;
+          console.warn(`Gemini quiz model ${modelName} failed, trying next fallback...`, genErr);
+        }
+      }
+      if (!responseText) {
+        throw lastErr || new Error("All Gemini models failed for quiz generation.");
+      }
+    }
+
+    const p = safeParseJSON(responseText);
 
     // If a quiz or test is generated, run the local Solver Engine correction loop to verify correctness
     if (p.testData) {
@@ -388,14 +540,30 @@ Student Memory Profile: ${JSON.stringify(memory).slice(0, 500)}
       },
     ];
 
-    const response = await ai.models.generateContent({
-      model: DEFAULT_MODEL,
-      contents,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseMimeType: "application/json",
-      },
-    });
+    const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+    let response;
+    let lastErr;
+
+    for (const modelName of geminiModels) {
+      try {
+        response = await ai.models.generateContent({
+          model: modelName,
+          contents,
+          config: {
+            systemInstruction: SYSTEM_PROMPT,
+            responseMimeType: "application/json",
+          },
+        });
+        break; // Succeeded!
+      } catch (visErr) {
+        lastErr = visErr;
+        console.warn(`Gemini vision model ${modelName} failed, trying next fallback...`, visErr);
+      }
+    }
+
+    if (!response) {
+      throw lastErr || new Error("All Gemini vision models exhausted.");
+    }
 
     const contentText = response.text || "{}";
     const parsed = safeParseJSON(contentText);

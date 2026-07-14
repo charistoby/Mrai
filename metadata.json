@@ -1,0 +1,10 @@
+{
+  "name": "MR.AI — Learn Maths & Physics",
+  "description": "A professional AI tutor for Maths, Further Maths, and Physics calculations with integrated interactive testing, image cropping, and handwritten assignment marking capabilities.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

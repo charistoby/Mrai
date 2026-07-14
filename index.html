@@ -100,7 +100,7 @@
     }
   </style>
 </head>
-<body class="bg-space-950 text-slate-100 font-sans h-screen w-screen overflow-hidden antialiased">
+<body class="bg-space-950 text-slate-100 font-sans h-[100dvh] w-screen overflow-hidden antialiased">
 
   <div class="flex h-full w-full flex-col">
     
@@ -219,7 +219,7 @@
     </aside>
 
     <!-- MAIN CHAT INTERFACE -->
-    <main class="flex-1 flex flex-col h-full bg-space-950 relative min-w-0">
+    <main class="flex-1 flex flex-col min-h-0 bg-space-950 relative">
       
       <!-- HEADER BAR -->
       <header class="h-16 flex items-center justify-between px-4 bg-space-900 border-b border-space-800 z-10 shadow-md">
@@ -971,14 +971,76 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: text, history, memory })
         });
-        const data = await response.json();
         
         document.getElementById('typingIndicator')?.remove();
         
-        if (data.testData || data.type === 'quiz' || data.type === 'theory_quiz') {
-          addMsg(data.reply, 'bot', data.testData);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          if (data.testData || data.type === 'quiz' || data.type === 'theory_quiz') {
+            addMsg(data.reply, 'bot', data.testData);
+          } else {
+            addMsg(data.reply || 'Calculation complete.', 'bot');
+          }
         } else {
-          addMsg(data.reply || 'Calculation complete.', 'bot');
+          // Streamed text response! Read chunk-by-chunk for ultra-fast load speed
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let done = false;
+          
+          // Create the bot message container
+          const msgWrapper = document.createElement('div');
+          msgWrapper.className = 'flex justify-start animate-slide-in';
+          
+          const d = document.createElement('div');
+          d.className = 'msg rounded-2xl max-w-[85%] md:max-w-[75%] px-5 py-4 shadow-xl text-sm leading-relaxed bg-space-900 border border-space-800 text-slate-100 rounded-tl-sm';
+          
+          const textContainer = document.createElement('span');
+          d.appendChild(textContainer);
+          
+          // Timestamp
+          const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeDiv = document.createElement('div');
+          timeDiv.className = 'text-[10px] text-slate-500 text-right mt-3 font-mono tracking-wide';
+          timeDiv.textContent = timeStr;
+          d.appendChild(timeDiv);
+          
+          msgWrapper.appendChild(d);
+          chatEl.appendChild(msgWrapper);
+          chatEl.scrollTop = chatEl.scrollHeight;
+          
+          let fullText = '';
+          while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            done = readerDone;
+            if (value) {
+              const chunk = decoder.decode(value, { stream: !done });
+              fullText += chunk;
+              
+              // Map formatters
+              let h = fullText
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<br>');
+
+              h = h.replace(/&lt;u&gt;/g, '<u>').replace(/&lt;\/u&gt;/g, '</u>')
+                   .replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>')
+                   .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+                   
+              textContainer.innerHTML = h;
+              chatEl.scrollTop = chatEl.scrollHeight;
+            }
+          }
+          
+          // MathJax typeset on complete chunk
+          if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([d]).catch(err => console.error(err));
+          }
+          
+          // Append to memory history
+          history.push({ role: 'assistant', content: fullText.slice(0, 1500) });
+          if (history.length > 30) history.shift();
         }
       } catch (err) {
         document.getElementById('typingIndicator')?.remove();

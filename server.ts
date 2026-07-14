@@ -159,12 +159,61 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
     if (solverResult.solved && solverResult.explanation) {
       return res.status(200).json({
         type: "chat",
-        reply: `⚠️ **Gemini API Key missing.** Switched to **Local Solver Engine** for your calculation:\\n\\n${solverResult.explanation}`
+        reply: `⚠️ **Gemini API Key missing.** Switched to **Local Solver Engine** for your calculation:\n\n${solverResult.explanation}`
       });
     }
     return res.status(200).json({ type: "chat", reply: "Server misconfiguration: GEMINI_API_KEY is missing." });
   }
 
+  // OPTIMIZATION: Stream standard chat responses for ultra-fast, sub-second initial load times
+  if (!isObj && !isTh) {
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Transfer-Encoding", "chunked");
+
+    const systemInstruction = `You are MR.AI, a highly expert and supportive professional tutor in Mathematics, Further Mathematics, Chemistry, and Physics calculations.
+Guidelines:
+1. Always format mathematical formulas using clean standard TeX inside $...$ (e.g. $y = mx + c$, $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$).
+2. Speak clearly, direct to the point, and friendly.
+3. Be supportive. If the user's pace in memory is 'slow', teach in smaller, bite-sized step-by-step increments.`;
+
+    try {
+      const contents = [
+        ...history.map((h: any) => ({
+          role: h.role === "assistant" ? "model" : h.role,
+          parts: [{ text: h.content }],
+        })),
+        { role: "user", parts: [{ text: message }] },
+      ];
+
+      const responseStream = await ai.models.generateContentStream({
+        model: DEFAULT_MODEL,
+        contents,
+        config: {
+          systemInstruction,
+        },
+      });
+
+      for await (const chunk of responseStream) {
+        if (chunk.text) {
+          res.write(chunk.text);
+        }
+      }
+      res.end();
+      return;
+    } catch (err) {
+      console.error("Chat streaming API error:", err);
+      const solverResult = solveQuestionLocally(message);
+      if (solverResult.solved && solverResult.explanation) {
+        res.write(`⚠️ **Gemini API quota/limit reached.**\n\nMR.AI's **Local Calculation Solver Engine** has successfully parsed and solved your question:\n\n${solverResult.explanation}`);
+      } else {
+        res.write("⚠️ **Gemini API free tier quota limit reached (20 requests/day).**\n\nTo ensure your study session is uninterrupted, MR.AI has loaded the **Local Calculation Solver Engine**!\n\nYou can solve equations like $3x + 7 = 22$ or $x^2 - 5x + 6 = 0$ directly in the chat, or select any of the **Curriculum Topics** to master concepts.");
+      }
+      res.end();
+      return;
+    }
+  }
+
+  // Quiz generation remains structured JSON
   const systemInstruction = isObj
     ? `You are MR.AI professional question setter. Topic: "${message}". Create exactly 10 high-quality objective questions testing mathematical, scientific, or physics calculations. 
 Return ONLY JSON with this format:
@@ -182,8 +231,7 @@ Return ONLY JSON with this format:
   }
 }
 IMPORTANT: Make sure every option is wrapped in $...$ and contains mathematical symbols. Put the actual calculation values in the options, and you MUST provide the correct option letter ("A", "B", "C", or "D") in the "correct" field of each question in the generated JSON. All math must be in standard TeX format wrapped in $...$.`
-    : isTh
-    ? `You are MR.AI theory question setter. Topic: "${message}". Create theory questions. 
+    : `You are MR.AI theory question setter. Topic: "${message}". Create theory questions. 
 Return ONLY JSON:
 {
   "type": "theory_quiz",
@@ -195,17 +243,7 @@ Return ONLY JSON:
       "mark": "5 marks"
     }
   }
-}`
-    : `You are MR.AI, a highly expert and supportive professional tutor in Mathematics, Further Mathematics, Chemistry, and Physics calculations.
-Reply with JSON of the form:
-{
-  "type": "chat",
-  "reply": "<u>Topic</u>: Ohm's Law\\n\\n<u>Step 1</u>: Identify variables $V = 15V$, $I = 5A$.\\n<u>Step 2</u>: Use Formula $R = \\\\frac{V}{I}$.\\n<u>Answer</u>: $3\\\\Omega$.\\n\\nClear?"
-}
-Guidelines:
-1. Always format mathematical formulas using clean standard TeX inside $...$ (e.g. $y = mx + c$, $x = \\\\frac{-b \\\\pm \\\\sqrt{b^2-4ac}}{2a}$).
-2. Speak clearly, direct to the point, and friendly.
-3. Be supportive. If the user's pace in memory is 'slow', teach in smaller, bite-sized step-by-step increments.`;
+}`;
 
   try {
     const contents = [
@@ -261,24 +299,7 @@ Guidelines:
     console.error("Chat API error:", err);
 
     // If they requested a quiz or a test, provide the pre-curated high-quality offline version!
-    if (isObj || isTh) {
-      return res.status(200).json(getFallbackTest(message, isTh));
-    }
-
-    // Try to solve the question locally using our solver engine
-    const solverResult = solveQuestionLocally(message);
-    if (solverResult.solved && solverResult.explanation) {
-      return res.status(200).json({
-        type: "chat",
-        reply: `⚠️ **Gemini API free tier quota reached.**\\n\\nMR.AI's **Local Calculation Solver Engine** has successfully parsed and solved your question:\\n\\n${solverResult.explanation}`
-      });
-    }
-
-    // Default chat fallback when quota is reached
-    return res.status(200).json({
-      type: "chat",
-      reply: "⚠️ **Gemini API free tier quota limit reached (20 requests/day).**\\n\\nTo ensure your study session is uninterrupted, MR.AI has loaded the **Local Calculation Solver Engine**!\\n\\nYou can solve equations like $3x + 7 = 22$ or $x^2 - 5x + 6 = 0$ directly in the chat, or select any of the **Curriculum Topics** on the left sidebar to master concepts and log your academic progress."
-    });
+    return res.status(200).json(getFallbackTest(message, isTh));
   }
 });
 

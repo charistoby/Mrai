@@ -102,12 +102,12 @@
 </head>
 <body class="bg-space-950 text-slate-100 font-sans h-screen w-screen overflow-hidden antialiased">
 
-  <div class="flex h-full w-full flex-col md:flex-row">
+  <div class="flex h-full w-full flex-col">
     
-    <!-- LEFT SIDEBAR: Stats Dashboard & Quick Topics (Collapsible/Hidden on Small Devices, Toggleable) -->
-    <aside id="sidebar" class="hidden md:flex w-full md:w-80 flex-col bg-space-900 border-r border-space-800 shrink-0 h-full">
+    <!-- ACADEMIC PROGRESSION TAB: Stats Dashboard & Profile (Toggled via Menu Icon) -->
+    <aside id="sidebar" class="hidden w-full h-full flex-col bg-space-900 shrink-0">
       <!-- Sidebar Header -->
-      <div class="p-5 border-b border-space-800 flex items-center justify-between">
+      <div class="p-5 border-b border-space-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-blue to-accent-violet flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-accent-blue/20">
             A
@@ -119,21 +119,21 @@
         </div>
       </div>
 
-      <!-- Back to Chat Button (Highly requested) -->
-      <div class="p-4 border-b border-space-800">
+      <!-- Back to Chat Button -->
+      <div class="p-4 border-b border-space-800 shrink-0">
         <button onclick="backToChat()" class="w-full h-11 rounded-xl bg-gradient-to-r from-accent-blue/20 to-accent-violet/20 hover:from-accent-blue/35 hover:to-accent-violet/35 text-xs font-semibold text-white border border-accent-blue/30 flex items-center justify-center gap-2.5 transition duration-200 shadow-md">
           💬 Back to AI Chat
         </button>
       </div>
 
-      <!-- Student Profile & Progression Panel -->
-      <div class="p-5 border-b border-space-800 space-y-4 flex-1 overflow-y-auto flex flex-col min-h-0">
+      <!-- Student Profile & Progression Panel (Evenly split 50-50 with the curriculum launch area) -->
+      <div class="p-6 border-b border-space-800 flex-1 overflow-y-auto space-y-6 flex flex-col justify-center min-h-0">
         <!-- Student Profile Card (Editable Email) -->
-        <div class="space-y-1.5">
+        <div class="space-y-2">
           <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Student Profile</span>
           
           <!-- View Email Area -->
-          <div id="emailDisplayArea" class="flex items-center justify-between bg-space-850 bg-opacity-40 p-3 rounded-xl border border-space-800">
+          <div id="emailDisplayArea" class="flex items-center justify-between bg-space-850 bg-opacity-40 p-4 rounded-xl border border-space-800">
             <div class="min-w-0 flex-1">
               <span class="text-[9px] text-slate-500 uppercase tracking-wider block font-mono">Current User</span>
               <span id="studentEmailVal" class="text-xs font-mono text-white font-medium truncate block">lichianukem6@gmail.com</span>
@@ -144,14 +144,14 @@
           </div>
 
           <!-- Edit Email Area -->
-          <div id="emailEditArea" class="hidden flex-col gap-2 bg-space-850 bg-opacity-45 p-3 rounded-xl border border-space-700">
+          <div id="emailEditArea" class="hidden flex-col gap-2 bg-space-850 bg-opacity-45 p-4 rounded-xl border border-space-700">
             <span class="text-[9px] text-slate-400 uppercase tracking-wider font-mono">Enter New Email Address</span>
             <div class="flex items-center gap-1.5">
-              <input id="emailInput" type="email" class="flex-1 h-8 px-2.5 rounded bg-space-950 border border-space-800 text-xs text-white focus:outline-none focus:border-accent-blue font-mono" placeholder="student@email.com">
-              <button onclick="saveStudentEmail()" class="h-8 w-8 rounded bg-accent-emerald text-white text-xs font-bold flex items-center justify-center hover:opacity-90" title="Save changes">
+              <input id="emailInput" type="email" class="flex-1 h-9 px-3 rounded bg-space-950 border border-space-800 text-xs text-white focus:outline-none focus:border-accent-blue font-mono" placeholder="student@email.com">
+              <button onclick="saveStudentEmail()" class="h-9 w-9 rounded bg-accent-emerald text-white text-xs font-bold flex items-center justify-center hover:opacity-90" title="Save changes">
                 ✓
               </button>
-              <button onclick="cancelEmailEdit()" class="h-8 w-8 rounded bg-space-800 border border-space-700 text-slate-400 text-xs font-bold flex items-center justify-center hover:text-white" title="Cancel">
+              <button onclick="cancelEmailEdit()" class="h-9 w-9 rounded bg-space-800 border border-space-700 text-slate-400 text-xs font-bold flex items-center justify-center hover:text-white" title="Cancel">
                 ✕
               </button>
             </div>
@@ -159,7 +159,7 @@
         </div>
 
         <!-- Academic Progression Status & Reset -->
-        <div class="space-y-3 bg-space-850 bg-opacity-40 p-4 rounded-xl border border-space-800">
+        <div class="space-y-4 bg-space-850 bg-opacity-40 p-5 rounded-xl border border-space-800">
           <div class="flex items-center justify-between">
             <span id="progressionLevelBadge" class="text-[10px] px-2 py-0.5 rounded bg-accent-violet/15 text-accent-violet border border-accent-violet/30 font-bold uppercase tracking-wide">Level 1: Novice</span>
             <button onclick="resetAcademicProgression()" class="text-[10px] text-accent-rose hover:underline font-semibold flex items-center gap-1" title="Reset all academic progress stats">
@@ -167,24 +167,24 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-2 gap-2 pb-1">
-            <div class="bg-space-950 p-2 rounded-lg border border-space-800/60">
+          <div class="grid grid-cols-2 gap-3 pb-1">
+            <div class="bg-space-950 p-3 rounded-lg border border-space-800/60">
               <span class="text-[9px] text-slate-500 uppercase block font-mono">Solved</span>
               <span id="statsSolved" class="text-sm font-bold text-white font-mono">0</span>
             </div>
-            <div class="bg-space-950 p-2 rounded-lg border border-space-800/60">
+            <div class="bg-space-950 p-3 rounded-lg border border-space-800/60">
               <span class="text-[9px] text-slate-500 uppercase block font-mono">Streak</span>
               <span id="statsStreak" class="text-sm font-bold text-accent-emerald font-mono">1 day</span>
             </div>
           </div>
 
           <!-- Progression bar -->
-          <div class="space-y-1">
+          <div class="space-y-2">
             <div class="flex justify-between text-[10px] text-slate-400 font-mono">
               <span>Level Progression</span>
               <span id="progressionPercent">0%</span>
             </div>
-            <div class="w-full bg-space-950 rounded-full h-2 overflow-hidden border border-space-800">
+            <div class="w-full bg-space-950 rounded-full h-2.5 overflow-hidden border border-space-800">
               <div id="progressionBar" class="bg-gradient-to-r from-accent-blue to-accent-violet h-full w-0 transition-all duration-500"></div>
             </div>
             <p class="text-[9px] text-slate-500 italic">Every 10 solved calculations increases your academic level.</p>
@@ -192,7 +192,7 @@
         </div>
 
         <!-- Mode Indicator Widget -->
-        <div class="bg-space-800 bg-opacity-60 p-3 rounded-xl border border-space-700 flex items-center justify-between">
+        <div class="bg-space-800 bg-opacity-60 p-4 rounded-xl border border-space-700 flex items-center justify-between shrink-0">
           <span class="text-xs text-slate-300 font-medium">Teaching Pace</span>
           <span id="paceBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-blue/15 text-accent-blue border border-accent-blue/30">
             Normal Mode
@@ -200,43 +200,17 @@
         </div>
       </div>
 
-      <!-- Quick Concept Launchers (Curriculum topics) -->
-      <div class="p-5 flex-1 overflow-y-auto space-y-4 flex flex-col min-h-0">
-        <div class="space-y-3 pt-1 shrink-0">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">MR.AI Curriculum</h3>
-            <span class="text-[9px] text-slate-500 uppercase tracking-widest font-mono">Calculation Topics</span>
-          </div>
-
-          <!-- Subject Select Dropdown -->
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Select Subject</label>
-            <select id="curriculumSubject" onchange="renderCurriculum()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200">
-              <option value="all">🌍 All Subjects</option>
-              <option value="math">🔢 Mathematics</option>
-              <option value="fmath">📐 Further Mathematics</option>
-              <option value="physics">⚡ Physics</option>
-              <option value="chemistry">🧪 Chemistry</option>
-            </select>
-          </div>
-
-          <!-- Topic Search Bar -->
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Search Topics</label>
-            <div class="relative flex items-center">
-              <input type="text" id="curriculumSearch" oninput="renderCurriculum()" placeholder="Search calculation topics..." class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-violet transition duration-200">
-            </div>
-          </div>
-        </div>
-
-        <!-- Dynamic Topics List container -->
-        <div id="curriculumContainer" class="space-y-2 pt-2 overflow-y-auto flex-1 min-h-[150px]">
-          <!-- Dynamically populated topics list -->
-        </div>
+      <!-- Quick Concept Launchers (Curriculum topics button for clean 50-50 evening layout) -->
+      <div class="p-6 flex flex-col justify-center space-y-3 shrink-0">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">MR.AI Curriculum</span>
+        <button onclick="openCurriculumModal()" class="w-full h-12 rounded-xl bg-gradient-to-r from-accent-blue/20 to-accent-violet/20 hover:from-accent-blue/35 hover:to-accent-violet/35 text-xs font-semibold text-white border border-accent-blue/30 flex items-center justify-center gap-2 transition duration-200 shadow-md">
+          📚 Explore Calculation Topics
+        </button>
+        <p class="text-[10px] text-slate-500 text-center italic">Tap to explore detailed sub-topics across Mathematics, Physics, Chemistry and Further Maths.</p>
       </div>
 
       <!-- Workspace Footer -->
-      <div class="p-4 border-t border-space-800 bg-space-950 flex items-center justify-between">
+      <div class="p-4 border-t border-space-800 bg-space-950 flex items-center justify-between shrink-0">
         <span class="text-xs text-slate-500">v2.1 Professional</span>
         <button onclick="openTest()" class="text-xs px-3 py-1.5 rounded-lg bg-accent-violet/20 hover:bg-accent-violet/30 text-accent-violet font-semibold border border-accent-violet/30 transition">
           📝 Create Test
@@ -250,8 +224,8 @@
       <!-- HEADER BAR -->
       <header class="h-16 flex items-center justify-between px-4 bg-space-900 border-b border-space-800 z-10 shadow-md">
         <div class="flex items-center gap-3">
-          <!-- Mobile Sidebar/Menu Toggle Button -->
-          <button id="sidebarToggle" class="md:hidden w-10 h-10 rounded-lg border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:bg-space-800 hover:text-white transition">
+          <!-- Sidebar/Menu Toggle Button (Always visible on all screens) -->
+          <button id="sidebarToggle" onclick="showAcademicTab()" class="w-10 h-10 rounded-lg border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:bg-space-800 hover:text-white transition" title="View Academic Progression">
             ☰
           </button>
           <div>
@@ -408,6 +382,60 @@
       <button onclick="cDone()" class="flex-1 h-12 rounded-xl bg-accent-emerald hover:bg-accent-emerald/90 text-white font-bold transition">
         Crop & Submit Answer
       </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CURRICULUM TOPICS EXPLORER -->
+  <div id="curriculumM" class="fixed inset-0 bg-space-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-[80] transition-all">
+    <div class="w-full max-w-xl bg-space-900 border border-space-800 rounded-2xl shadow-2xl overflow-hidden glow-blue flex flex-col max-h-[85vh]">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-space-950 border-b border-space-800 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📚</span>
+          <h3 class="font-bold text-sm text-white uppercase tracking-wider">MR.AI Curriculum Topics</h3>
+        </div>
+        <button onclick="closeCurriculumModal()" class="text-slate-500 hover:text-slate-300 transition text-lg">✕</button>
+      </div>
+
+      <!-- Modal Body / Scroller -->
+      <div class="p-5 space-y-4 overflow-y-auto flex-1 min-h-0">
+        <p class="text-xs text-slate-400">Select any curriculum topic to instantly generate an explanation and starter practice question in the AI Chat.</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
+          <!-- Subject Select Dropdown -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Select Subject</label>
+            <select id="curriculumSubject" onchange="renderCurriculum()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200">
+              <option value="all">🌍 All Subjects</option>
+              <option value="math">🔢 Mathematics</option>
+              <option value="fmath">📐 Further Mathematics</option>
+              <option value="physics">⚡ Physics</option>
+              <option value="chemistry">🧪 Chemistry</option>
+            </select>
+          </div>
+
+          <!-- Topic Search Bar -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Search Topics</label>
+            <div class="relative flex items-center">
+              <input type="text" id="curriculumSearch" oninput="renderCurriculum()" placeholder="Search calculation topics..." class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-violet transition duration-200">
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Topics List container -->
+        <div id="curriculumContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+          <!-- Dynamically populated topics list -->
+        </div>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="px-5 py-3.5 bg-space-950 border-t border-space-800 flex justify-end shrink-0">
+        <button onclick="closeCurriculumModal()" class="px-4 py-2 text-xs font-semibold rounded-lg bg-space-800 text-slate-300 hover:bg-space-700 transition">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1063,14 +1091,25 @@
       }
     };
 
+    function showAcademicTab() {
+      const sidebar = document.getElementById('sidebar');
+      const main = document.querySelector('main');
+      if (sidebar && main) {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('flex');
+        main.classList.add('hidden');
+        main.classList.remove('flex');
+      }
+    }
+
     function backToChat() {
-      // Hide sidebar drawer on mobile devices
-      if (window.innerWidth < 768) {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-          sidebar.classList.add('hidden');
-          sidebar.classList.remove('flex');
-        }
+      const sidebar = document.getElementById('sidebar');
+      const main = document.querySelector('main');
+      if (sidebar && main) {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('flex');
+        main.classList.remove('hidden');
+        main.classList.add('flex');
       }
       
       // Scroll main chat container to the bottom
@@ -1084,6 +1123,29 @@
       if (inp) {
         inp.focus();
       }
+    }
+
+    function openCurriculumModal() {
+      const modal = document.getElementById('curriculumM');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        renderCurriculum();
+      }
+    }
+
+    function closeCurriculumModal() {
+      const modal = document.getElementById('curriculumM');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function selectCurriculumTopic(topicAction) {
+      closeCurriculumModal();
+      backToChat();
+      quickAction(topicAction);
     }
 
     function initCurriculum() {
@@ -1120,7 +1182,7 @@
       // Handle empty search scenarios
       if (itemsToRender.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-6 px-3 bg-space-850/40 rounded-xl border border-space-800">
+          <div class="text-center py-6 px-3 bg-space-850/40 rounded-xl border border-space-800 col-span-2">
             <span class="text-xs text-slate-400 block font-medium">No matching topics found</span>
           </div>`;
         return;
@@ -1131,7 +1193,7 @@
         const itemDiv = document.createElement('div');
         itemDiv.className = "p-1 bg-space-850 bg-opacity-60 border border-space-800 rounded-lg hover:border-space-700 hover:bg-space-800 transition";
         itemDiv.innerHTML = `
-          <button onclick="quickAction('${item.action}')" class="w-full text-left text-xs p-2 flex flex-col justify-center min-w-0">
+          <button onclick="selectCurriculumTopic('${item.action}')" class="w-full text-left text-xs p-2 flex flex-col justify-center min-w-0">
             <span class="truncate font-medium text-slate-200" title="${item.name}">${item.name}</span>
             <span class="text-[9px] font-mono opacity-85 truncate ${item.color}">${item.desc}</span>
           </button>
@@ -1159,11 +1221,7 @@
         }
       });
 
-      // Mobile Sidebar Drawer Controller
-      sidebarToggle.onclick = (e) => {
-        sidebar.classList.toggle('hidden');
-        sidebar.classList.toggle('flex');
-      };
+
 
       // Dictation integration (Speech Recognition)
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;

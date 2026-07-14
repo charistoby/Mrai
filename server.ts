@@ -1,6 +1,6 @@
 import express from "express";
 import path from "path";
-import { ai, DEFAULT_MODEL, verifyWithAI } from "./src/ai/client";
+import { ai, DEFAULT_MODEL, verifyWithAI, safeParseJSON } from "./src/ai/client";
 import { solveQuestionLocally, findOptionLetter } from "./src/solvers/index";
 
 const app = express();
@@ -33,16 +33,116 @@ function parseDataUrl(dataUrl: string) {
   };
 }
 
+// ---------- LOCAL FALLBACK TEST GENERATOR (Graces rate/quota limits) ----------
+function getFallbackTest(message: string, isTheory: boolean) {
+  const msg = message.toLowerCase();
+  let category = "electricity";
+  if (msg.includes("mechanic") || msg.includes("newton") || msg.includes("force")) {
+    category = "mechanics";
+  } else if (msg.includes("quadratic")) {
+    category = "quadratic";
+  } else if (msg.includes("linear")) {
+    category = "linear";
+  } else if (msg.includes("mole") || msg.includes("molar") || msg.includes("chemistry")) {
+    category = "mole";
+  }
+
+  const reply = "⚠️ **Gemini API busy (Free Tier quota reached). Switched to Local Offline Practice Engine!**\\n\\nTo ensure your learning is uninterrupted, we have generated a high-quality practice test locally on your selected topic.";
+
+  if (isTheory) {
+    const questions: Record<string, any[]> = {
+      electricity: [
+        { qid: 1, question: "A lamp of resistance $15\\Omega$ is connected to a $120V$ power line. Show the formula and step-by-step calculations for the current flowing through it.", mark: "5 marks" },
+        { qid: 2, question: "State Ohm's law. Calculate the voltage drop across a $100\\Omega$ resistor when the current is $0.2A$.", mark: "5 marks" }
+      ],
+      mechanics: [
+        { qid: 1, question: "State Newton's Second Law. An object of mass $12kg$ accelerates at $1.5m/s^2$. Calculate the net force.", mark: "5 marks" },
+        { qid: 2, question: "A force of $20N$ is applied to a mass of $4kg$. Determine its acceleration and list correct units.", mark: "5 marks" }
+      ],
+      quadratic: [
+        { qid: 1, question: "Solve $x^2 - 7x + 12 = 0$ using the quadratic formula. Write down all steps and roots.", mark: "5 marks" },
+        { qid: 2, question: "Solve $2x^2 + 5x - 3 = 0$. Show your factorization or quadratic steps.", mark: "5 marks" }
+      ],
+      linear: [
+        { qid: 1, question: "Solve the equation $4(x - 3) = 16$. Write out each algebraic step.", mark: "5 marks" },
+        { qid: 2, question: "Solve the simultaneous equations: $2x + y = 7$ and $x - y = 2$.", mark: "5 marks" }
+      ],
+      mole: [
+        { qid: 1, question: "An amount of $90g$ of Glucose ($C_6H_{12}O_6$, Molar Mass = $180g/mol$) is dissolved in water. Find the number of moles.", mark: "5 marks" },
+        { qid: 2, question: "Find the mass of $0.25$ moles of Sodium Hydroxide ($NaOH$, Molar Mass = $40g/mol$).", mark: "5 marks" }
+      ]
+    };
+
+    const qList = questions[category] || questions.electricity;
+    const testData: Record<string, any> = {};
+    qList.forEach((q, i) => {
+      testData[String(i + 1)] = q;
+    });
+
+    return {
+      type: "theory_quiz",
+      reply,
+      testData
+    };
+  } else {
+    const questions: Record<string, any[]> = {
+      electricity: [
+        { qid: 1, question: "An electrical heater of resistance $12\\Omega$ is connected to a $240V$ supply. What is the current flowing through it?", options: ["$10A$", "$20A$", "$15A$", "$30A$"], correct: "B", topic: "Electricity" },
+        { qid: 2, question: "What voltage is required to pass a current of $3A$ through a $5\\Omega$ resistor?", options: ["$1.5V$", "$10V$", "$15V$", "$25V$"], correct: "C", topic: "Electricity" },
+        { qid: 3, question: "An electrical lamp has a resistance of $8\\Omega$ when burning. If the voltage is $24V$, find the current.", options: ["$2A$", "$3A$", "$4A$", "$6A$"], correct: "B", topic: "Electricity" },
+        { qid: 4, question: "Calculate the resistance of a toaster that draws $5A$ of current from a $120V$ outlet.", options: ["$12\\Omega$", "$24\\Omega$", "$48\\Omega$", "$60\\Omega$"], correct: "B", topic: "Electricity" },
+        { qid: 5, question: "A battery has a voltage of $9V$ and is connected to a lightbulb drawing $0.5A$ of current. What is the resistance of the bulb?", options: ["$4.5\\Omega$", "$9\\Omega$", "$18\\Omega$", "$36\\Omega$"], correct: "C", topic: "Electricity" }
+      ],
+      mechanics: [
+        { qid: 1, question: "A net force of $50N$ acts on a mass of $10kg$. Calculate the acceleration.", options: ["$2m/s^2$", "$5m/s^2$", "$10m/s^2$", "$500m/s^2$"], correct: "B", topic: "Mechanics" },
+        { qid: 2, question: "An object has a mass of $8kg$ and accelerates at $4m/s^2$. What is the magnitude of the net force acting on it?", options: ["$2N$", "$12N$", "$32N$", "$64N$"], correct: "C", topic: "Mechanics" },
+        { qid: 3, question: "What mass is accelerated at $3m/s^2$ by a net force of $15N$?", options: ["$5kg$", "$45kg$", "$0.2kg$", "$10kg$"], correct: "A", topic: "Mechanics" },
+        { qid: 4, question: "A car of mass $1200kg$ accelerates from rest at $2m/s^2$. Find the net force acting on the car.", options: ["$600N$", "$1200N$", "$2400N$", "$4800N$"], correct: "C", topic: "Mechanics" },
+        { qid: 5, question: "A force of $100N$ causes an object to accelerate at $20m/s^2$. Determine the mass of the object.", options: ["$0.2kg$", "$5kg$", "$50kg$", "$2000kg$"], correct: "B", topic: "Mechanics" }
+      ],
+      quadratic: [
+        { qid: 1, question: "Find the roots of the quadratic equation $x^2 - 5x + 6 = 0$.", options: ["$x = 1, 6$", "$x = 2, 3$", "$x = -2, -3$", "$x = -5, 6$"], correct: "B", topic: "Quadratic Equations" },
+        { qid: 2, question: "Solve the equation $x^2 - 9 = 0$.", options: ["$x = 3, -3$", "$x = 9, -9$", "$x = 0, 9$", "$x = 4.5, -4.5$"], correct: "A", topic: "Quadratic Equations" },
+        { qid: 3, question: "Solve the quadratic equation $x^2 - 4x + 4 = 0$.", options: ["$x = 2, -2$", "$x = 2$ (double root)", "$x = 4$ (double root)", "$x = -4, -4$"], correct: "B", topic: "Quadratic Equations" },
+        { qid: 4, question: "Find the roots of the equation $2x^2 - 8x = 0$.", options: ["$x = 0, 4$", "$x = 2, 8$", "$x = 0, 2$", "$x = 0, -4$"], correct: "A", topic: "Quadratic Equations" },
+        { qid: 5, question: "Solve the quadratic equation $x^2 + 3x - 10 = 0$.", options: ["$x = 2, -5$", "$x = -2, 5$", "$x = 2, 5$", "$x = -2, -5$"], correct: "A", topic: "Quadratic Equations" }
+      ],
+      linear: [
+        { qid: 1, question: "Solve for $x$ in the equation $3x + 7 = 22$.", options: ["$x = 3$", "$x = 5$", "$x = 7$", "$x = 9$"], correct: "B", topic: "Linear Algebra" },
+        { qid: 2, question: "Find the value of $y$ if $2y - 12 = 4$.", options: ["$y = 4$", "$y = 6$", "$y = 8$", "$y = 10$"], correct: "C", topic: "Linear Algebra" },
+        { qid: 3, question: "In the linear equation $5x - 3 = 2x + 9$, solve for $x$.", options: ["$x = 2$", "$x = 4$", "$x = 6$", "$x = 8$"], correct: "B", topic: "Linear Algebra" },
+        { qid: 4, question: "Solve the simple linear system for $x$: $x + y = 10$ and $x - y = 4$.", options: ["$x = 5$", "$x = 6$", "$x = 7$", "$x = 8$"], correct: "C", topic: "Linear Algebra" },
+        { qid: 5, question: "If $4x = 12$, what is the value of $x + 5$?", options: ["$8$", "$10$", "$12$", "$15$"], correct: "A", topic: "Linear Algebra" }
+      ],
+      mole: [
+        { qid: 1, question: "How many moles are in $36g$ of water ($H_2O$)? (Molar mass of $H_2O = 18g/mol$).", options: ["$1 mol$", "$2 mol$", "$3 mol$", "$4 mol$"], correct: "B", topic: "Chemistry" },
+        { qid: 2, question: "Calculate the mass of $0.5 mol$ of Carbon dioxide ($CO_2$). (Molar mass of $CO_2 = 44g/mol$).", options: ["$11g$", "$22g$", "$44g$", "$88g$"], correct: "B", topic: "Chemistry" },
+        { qid: 3, question: "How many moles are present in $58.5g$ of Sodium Chloride ($NaCl$)? (Molar mass of $NaCl = 58.5g/mol$).", options: ["$0.5 mol$", "$1 mol$", "$1.5 mol$", "$2 mol$"], correct: "B", topic: "Chemistry" },
+        { qid: 4, question: "Find the molar mass of an element if $3.0 moles$ of it have a mass of $72g$.", options: ["$12g/mol$", "$24g/mol$", "$36g/mol$", "$48g/mol$"], correct: "B", topic: "Chemistry" },
+        { qid: 5, question: "What is the mass of $2.5 mol$ of Helium ($He$)? (Molar mass of $He = 4g/mol$).", options: ["$5g$", "$10g$", "$15g$", "$20g$"], correct: "B", topic: "Chemistry" }
+      ]
+    };
+
+    const qList = questions[category] || questions.electricity;
+    const testData: Record<string, any> = {};
+    qList.forEach((q, i) => {
+      testData[String(i + 1)] = q;
+    });
+
+    return {
+      type: "quiz",
+      reply,
+      testData
+    };
+  }
+}
+
 // ---------- API ROUTES ----------
 
 /**
  * Endpoint for text-based educational chat and question generation
  */
 app.post("/api/chat", async (req: express.Request, res: express.Response) => {
-  if (!process.env.GEMINI_API_KEY) {
-    return res.status(200).json({ type: "chat", reply: "Server misconfiguration: GEMINI_API_KEY is missing." });
-  }
-
   const { message, history = [], memory = {} } = req.body || {};
   if (!message) {
     return res.status(400).json({ error: "Missing message payload" });
@@ -50,6 +150,20 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
 
   const isObj = /Type:\s*Objectives/i.test(message);
   const isTh = /Type:\s*Theory/i.test(message);
+
+  if (!process.env.GEMINI_API_KEY) {
+    if (isObj || isTh) {
+      return res.status(200).json(getFallbackTest(message, isTh));
+    }
+    const solverResult = solveQuestionLocally(message);
+    if (solverResult.solved && solverResult.explanation) {
+      return res.status(200).json({
+        type: "chat",
+        reply: `⚠️ **Gemini API Key missing.** Switched to **Local Solver Engine** for your calculation:\\n\\n${solverResult.explanation}`
+      });
+    }
+    return res.status(200).json({ type: "chat", reply: "Server misconfiguration: GEMINI_API_KEY is missing." });
+  }
 
   const systemInstruction = isObj
     ? `You are MR.AI professional question setter. Topic: "${message}". Create exactly 10 high-quality objective questions testing mathematical, scientific, or physics calculations. 
@@ -62,11 +176,12 @@ Return ONLY JSON with this format:
       "qid": 1,
       "question": "A resistor of resistance $R$ is connected to...",
       "options": ["$3\\Omega$", "$6\\Omega$", "$9\\Omega$", "$12\\Omega$"],
+      "correct": "B",
       "topic": "Electricity"
     }
   }
 }
-IMPORTANT: Make sure every option is wrapped in $...$ and contains mathematical symbols. Put the actual calculation values in the options, but DO NOT provide the answer letter in the generated JSON. All math must be in standard TeX format wrapped in $...$.`
+IMPORTANT: Make sure every option is wrapped in $...$ and contains mathematical symbols. Put the actual calculation values in the options, and you MUST provide the correct option letter ("A", "B", "C", or "D") in the "correct" field of each question in the generated JSON. All math must be in standard TeX format wrapped in $...$.`
     : isTh
     ? `You are MR.AI theory question setter. Topic: "${message}". Create theory questions. 
 Return ONLY JSON:
@@ -111,10 +226,9 @@ Guidelines:
     });
 
     const contentText = response.text || "{}";
-    const cleanedContent = contentText.replace(/^```json/, "").replace(/```$/, "").trim();
-    const p = JSON.parse(cleanedContent);
+    const p = safeParseJSON(contentText);
 
-    // If a quiz or test is generated, run the local Solver Engine correction loop to guarantee correctness
+    // If a quiz or test is generated, run the local Solver Engine correction loop to verify correctness
     if (p.testData) {
       for (const k in p.testData) {
         const q = p.testData[k];
@@ -127,19 +241,11 @@ Guidelines:
             ? findOptionLetter(q.options, solverResult.value) 
             : null;
 
-          // 2. If local solver is not applicable, use our LLM-verifier fall-back
-          if (!correctLetter) {
-            const aiLetter = await verifyWithAI(q.question, q.options);
-            if (aiLetter && ["A", "B", "C", "D"].includes(aiLetter)) {
-              correctLetter = aiLetter;
-            }
-          }
-
-          // 3. Fallback correction to ensure robust rendering and math consistency
+          // 2. Fallback correction: use solver result if found, otherwise trust the LLM-generated 'correct' field, defaulted to "A" if missing
           if (correctLetter) {
             q.correct = correctLetter;
           } else {
-            // Default to option A to guarantee there is always a marked key
+            // Default to generated correct answer or option A
             q.correct = q.correct || "A";
           }
 
@@ -153,9 +259,25 @@ Guidelines:
     return res.status(200).json(p);
   } catch (err) {
     console.error("Chat API error:", err);
+
+    // If they requested a quiz or a test, provide the pre-curated high-quality offline version!
+    if (isObj || isTh) {
+      return res.status(200).json(getFallbackTest(message, isTh));
+    }
+
+    // Try to solve the question locally using our solver engine
+    const solverResult = solveQuestionLocally(message);
+    if (solverResult.solved && solverResult.explanation) {
+      return res.status(200).json({
+        type: "chat",
+        reply: `⚠️ **Gemini API free tier quota reached.**\\n\\nMR.AI's **Local Calculation Solver Engine** has successfully parsed and solved your question:\\n\\n${solverResult.explanation}`
+      });
+    }
+
+    // Default chat fallback when quota is reached
     return res.status(200).json({
       type: "chat",
-      reply: "Network is busy. Please try that topic or question again! MR.AI is listening.",
+      reply: "⚠️ **Gemini API free tier quota limit reached (20 requests/day).**\\n\\nTo ensure your study session is uninterrupted, MR.AI has loaded the **Local Calculation Solver Engine**!\\n\\nYou can solve equations like $3x + 7 = 22$ or $x^2 - 5x + 6 = 0$ directly in the chat, or select any of the **Curriculum Topics** on the left sidebar to master concepts and log your academic progress."
     });
   }
 });
@@ -255,14 +377,13 @@ Student Memory Profile: ${JSON.stringify(memory).slice(0, 500)}
     });
 
     const contentText = response.text || "{}";
-    const cleanedContent = contentText.replace(/^```json/, "").replace(/```$/, "").trim();
-    const parsed = JSON.parse(cleanedContent);
+    const parsed = safeParseJSON(contentText);
     return res.status(200).json(parsed);
   } catch (err) {
     console.error("Vision API error:", err);
     return res.status(200).json({
       type: "chat",
-      reply: "Image analysis failed.\\n\\nPlease provide a clearer or more upright photograph of the page.",
+      reply: "⚠️ **Gemini API free tier quota limit reached (20 requests/day) or invalid image format.**\\n\\nOCR image scanning is temporarily offline. To continue studying without interruption, please type your calculation question (e.g. $3x + 10 = 25$) directly into the chat, or click any of the **Curriculum Topics** on the left to practice!",
     });
   }
 });

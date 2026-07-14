@@ -110,37 +110,90 @@
       <div class="p-5 border-b border-space-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-accent-blue to-accent-violet flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-accent-blue/20">
-            M
+            A
           </div>
           <div>
-            <h2 class="font-bold text-sm tracking-wide text-white uppercase">MR.AI Workspace</h2>
-            <p class="text-xs text-slate-400">Professional Calculation Platform</p>
+            <h2 class="font-bold text-sm tracking-wide text-white uppercase">Academic Progression</h2>
+            <p class="text-xs text-slate-400">Calculation & Progress Tracker</p>
           </div>
         </div>
       </div>
 
-      <!-- Live Statistics / Progress Profile -->
+      <!-- Back to Chat Button (Highly requested) -->
+      <div class="p-4 border-b border-space-800">
+        <button onclick="backToChat()" class="w-full h-11 rounded-xl bg-gradient-to-r from-accent-blue/20 to-accent-violet/20 hover:from-accent-blue/35 hover:to-accent-violet/35 text-xs font-semibold text-white border border-accent-blue/30 flex items-center justify-center gap-2.5 transition duration-200 shadow-md">
+          💬 Back to AI Chat
+        </button>
+      </div>
+
+      <!-- Student Profile & Progression Panel -->
       <div class="p-5 border-b border-space-800 space-y-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Study Statistics</h3>
-        
-        <div class="grid grid-cols-2 gap-3">
-          <!-- Stat Card 1 -->
-          <div class="bg-space-850 bg-opacity-40 p-3 rounded-xl border border-space-800">
-            <span class="text-xs text-slate-400 block mb-1">Solved</span>
-            <span id="statsSolved" class="text-lg font-bold text-white font-mono">0</span>
+        <!-- Student Profile Card (Editable Email) -->
+        <div class="space-y-1.5">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Student Profile</span>
+          
+          <!-- View Email Area -->
+          <div id="emailDisplayArea" class="flex items-center justify-between bg-space-850 bg-opacity-40 p-3 rounded-xl border border-space-800">
+            <div class="min-w-0 flex-1">
+              <span class="text-[9px] text-slate-500 uppercase tracking-wider block font-mono">Current User</span>
+              <span id="studentEmailVal" class="text-xs font-mono text-white font-medium truncate block">lichianukem6@gmail.com</span>
+            </div>
+            <button onclick="enableEmailEdit()" class="text-[10px] text-accent-blue hover:underline font-semibold ml-2 shrink-0" title="Edit logged in email address">
+              ✏️ Change
+            </button>
           </div>
-          <!-- Stat Card 2 -->
-          <div class="bg-space-850 bg-opacity-40 p-3 rounded-xl border border-space-800">
-            <span class="text-xs text-slate-400 block mb-1">Streak</span>
-            <span id="statsStreak" class="text-lg font-bold text-accent-emerald font-mono">0 days</span>
+
+          <!-- Edit Email Area -->
+          <div id="emailEditArea" class="hidden flex-col gap-2 bg-space-850 bg-opacity-45 p-3 rounded-xl border border-space-700">
+            <span class="text-[9px] text-slate-400 uppercase tracking-wider font-mono">Enter New Email Address</span>
+            <div class="flex items-center gap-1.5">
+              <input id="emailInput" type="email" class="flex-1 h-8 px-2.5 rounded bg-space-950 border border-space-800 text-xs text-white focus:outline-none focus:border-accent-blue font-mono" placeholder="student@email.com">
+              <button onclick="saveStudentEmail()" class="h-8 w-8 rounded bg-accent-emerald text-white text-xs font-bold flex items-center justify-center hover:opacity-90" title="Save changes">
+                ✓
+              </button>
+              <button onclick="cancelEmailEdit()" class="h-8 w-8 rounded bg-space-800 border border-space-700 text-slate-400 text-xs font-bold flex items-center justify-center hover:text-white" title="Cancel">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Progression Status & Reset -->
+        <div class="space-y-3 bg-space-850 bg-opacity-40 p-4 rounded-xl border border-space-800">
+          <div class="flex items-center justify-between">
+            <span id="progressionLevelBadge" class="text-[10px] px-2 py-0.5 rounded bg-accent-violet/15 text-accent-violet border border-accent-violet/30 font-bold uppercase tracking-wide">Level 1: Novice</span>
+            <button onclick="resetAcademicProgression()" class="text-[10px] text-accent-rose hover:underline font-semibold flex items-center gap-1" title="Reset all academic progress stats">
+              🔄 Reset
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pb-1">
+            <div class="bg-space-950 p-2 rounded-lg border border-space-800/60">
+              <span class="text-[9px] text-slate-500 uppercase block font-mono">Solved</span>
+              <span id="statsSolved" class="text-sm font-bold text-white font-mono">0</span>
+            </div>
+            <div class="bg-space-950 p-2 rounded-lg border border-space-800/60">
+              <span class="text-[9px] text-slate-500 uppercase block font-mono">Streak</span>
+              <span id="statsStreak" class="text-sm font-bold text-accent-emerald font-mono">1 day</span>
+            </div>
+          </div>
+
+          <!-- Progression bar -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+              <span>Level Progression</span>
+              <span id="progressionPercent">0%</span>
+            </div>
+            <div class="w-full bg-space-950 rounded-full h-2 overflow-hidden border border-space-800">
+              <div id="progressionBar" class="bg-gradient-to-r from-accent-blue to-accent-violet h-full w-0 transition-all duration-500"></div>
+            </div>
+            <p class="text-[9px] text-slate-500 italic">Every 10 solved calculations increases your academic level.</p>
           </div>
         </div>
 
         <!-- Mode Indicator Widget -->
         <div class="bg-space-800 bg-opacity-60 p-3 rounded-xl border border-space-700 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-300">Teaching Pace</span>
-          </div>
+          <span class="text-xs text-slate-300 font-medium">Teaching Pace</span>
           <span id="paceBadge" class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-blue/15 text-accent-blue border border-accent-blue/30">
             Normal Mode
           </span>
@@ -148,44 +201,37 @@
       </div>
 
       <!-- Quick Concept Launchers (Curriculum topics) -->
-      <div class="p-5 flex-1 overflow-y-auto space-y-4">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Curriculum Topics</h3>
-        
-        <div class="space-y-2">
-          <!-- Physics Section -->
-          <div class="space-y-1">
-            <span class="text-[10px] uppercase tracking-wider font-semibold text-accent-blue text-opacity-80">Physics</span>
-            <button onclick="quickAction('Ohm\'s Law explanation & calculations')" class="w-full text-left text-xs p-2.5 rounded-lg bg-space-850 border border-space-800 hover:border-space-700 hover:bg-space-800 transition flex items-center justify-between">
-              <span>Ohm's Law (V = IR)</span>
-              <span class="text-slate-500 font-mono text-[10px]">Circuit</span>
-            </button>
-            <button onclick="quickAction('Newton\'s Second Law mechanics calculations')" class="w-full text-left text-xs p-2.5 rounded-lg bg-space-850 border border-space-800 hover:border-space-700 hover:bg-space-800 transition flex items-center justify-between">
-              <span>Newtonian Mechanics</span>
-              <span class="text-slate-500 font-mono text-[10px]">F = ma</span>
-            </button>
+      <div class="p-5 flex-1 overflow-y-auto space-y-4 flex flex-col min-h-0">
+        <div class="space-y-3 pt-1 shrink-0">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">MR.AI Curriculum</h3>
+            <span class="text-[9px] text-slate-500 uppercase tracking-widest font-mono">Calculation Topics</span>
           </div>
 
-          <!-- Mathematics Section -->
-          <div class="space-y-1 pt-2">
-            <span class="text-[10px] uppercase tracking-wider font-semibold text-accent-violet text-opacity-80">Mathematics & Further Maths</span>
-            <button onclick="quickAction('Quadratic formula equation solution')" class="w-full text-left text-xs p-2.5 rounded-lg bg-space-850 border border-space-800 hover:border-space-700 hover:bg-space-800 transition flex items-center justify-between">
-              <span>Quadratic Solver</span>
-              <span class="text-slate-500 font-mono text-[10px]">Algebra</span>
-            </button>
-            <button onclick="quickAction('Linear equations calculation explanation')" class="w-full text-left text-xs p-2.5 rounded-lg bg-space-850 border border-space-800 hover:border-space-700 hover:bg-space-800 transition flex items-center justify-between">
-              <span>Linear Algebra</span>
-              <span class="text-slate-500 font-mono text-[10px]">Equations</span>
-            </button>
+          <!-- Subject Select Dropdown -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Select Subject</label>
+            <select id="curriculumSubject" onchange="renderCurriculum()" class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-slate-200 text-xs focus:outline-none focus:border-accent-blue transition duration-200">
+              <option value="all">🌍 All Subjects</option>
+              <option value="math">🔢 Mathematics</option>
+              <option value="fmath">📐 Further Mathematics</option>
+              <option value="physics">⚡ Physics</option>
+              <option value="chemistry">🧪 Chemistry</option>
+            </select>
           </div>
 
-          <!-- Chemistry Section -->
-          <div class="space-y-1 pt-2">
-            <span class="text-[10px] uppercase tracking-wider font-semibold text-accent-emerald text-opacity-80">Chemistry</span>
-            <button onclick="quickAction('Number of moles from mass and molar mass stoichiometry calculations')" class="w-full text-left text-xs p-2.5 rounded-lg bg-space-850 border border-space-800 hover:border-space-700 hover:bg-space-800 transition flex items-center justify-between">
-              <span>Mole Calculations</span>
-              <span class="text-slate-500 font-mono text-[10px]">n = m / M</span>
-            </button>
+          <!-- Topic Search Bar -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Search Topics</label>
+            <div class="relative flex items-center">
+              <input type="text" id="curriculumSearch" oninput="renderCurriculum()" placeholder="Search calculation topics..." class="w-full h-10 px-3 rounded-lg border border-space-800 bg-space-950 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-accent-violet transition duration-200">
+            </div>
           </div>
+        </div>
+
+        <!-- Dynamic Topics List container -->
+        <div id="curriculumContainer" class="space-y-2 pt-2 overflow-y-auto flex-1 min-h-[150px]">
+          <!-- Dynamically populated topics list -->
         </div>
       </div>
 
@@ -222,11 +268,6 @@
           <button onclick="clearChat()" class="text-xs font-semibold px-3 py-2 rounded-lg border border-space-800 bg-space-850 text-slate-300 hover:border-space-700 hover:bg-space-800 hover:text-white transition flex items-center gap-1.5" title="Clear current study session">
             🗑️ Clear
           </button>
-          
-          <!-- Save Chat Shortcut -->
-          <button onclick="saveChatSession()" class="text-xs font-semibold px-3 py-2 rounded-lg bg-accent-blue/10 hover:bg-accent-blue/20 text-accent-blue border border-accent-blue/20 hover:border-accent-blue/30 transition flex items-center gap-1.5" title="Save this conversation state">
-            💾 Save
-          </button>
 
           <!-- System Menu -->
           <button id="menuBtn" class="w-10 h-10 rounded-lg border border-space-800 bg-space-850 flex items-center justify-center text-slate-300 hover:bg-space-800 hover:text-white transition" title="More Actions">
@@ -235,25 +276,24 @@
         </div>
 
         <!-- DROP-DOWN MENU BOX -->
-        <div id="menuBox" class="absolute top-14 right-4 w-60 bg-space-900 border border-space-800 rounded-xl hidden flex-col shadow-2xl z-50 overflow-hidden glow-blue">
-          <div class="p-1.5 border-b border-space-800 bg-space-950 flex items-center justify-between px-3 py-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Quick Actions</span>
-            <span class="text-[10px] text-slate-500 font-mono">Select Option</span>
+        <div id="menuBox" class="absolute top-14 right-4 w-52 bg-space-900 border border-space-800 rounded-xl hidden flex-col shadow-2xl z-50 overflow-hidden glow-blue">
+          <div class="px-4 py-2.5 border-b border-space-800 bg-space-950 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            Actions
           </div>
-          <button onclick="openTest()" class="text-left px-4 py-3 text-sm text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2">
-            📝 New Exam / Test
+          <button onclick="openTest()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
+            📝 New Test
           </button>
-          <button onclick="openCam()" class="text-left px-4 py-3 text-sm text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2">
-            📸 OCR Camera Input
+          <button onclick="openCam()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
+            📸 Use Camera
           </button>
-          <button onclick="openGal()" class="text-left px-4 py-3 text-sm text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2">
-            🖼️ Choose Homework File
+          <button onclick="openGal()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
+            🖼️ Upload File
           </button>
-          <button onclick="toggleSlow()" class="text-left px-4 py-3 text-sm text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2">
-            🐢 Toggle Slow Pace
+          <button onclick="toggleSlow()" class="text-left px-4 py-2.5 text-xs text-slate-300 hover:bg-space-800 hover:text-white transition border-b border-space-800 flex items-center gap-2 font-medium">
+            🐢 Slow Pace
           </button>
-          <button onclick="clearChat()" class="text-left px-4 py-3 text-sm text-accent-rose hover:bg-accent-rose/10 transition flex items-center gap-2">
-            🗑️ Wipe Study Session
+          <button onclick="clearChat()" class="text-left px-4 py-2.5 text-xs text-accent-rose hover:bg-accent-rose/10 transition flex items-center gap-2 font-semibold">
+            🗑️ Clear Chat
           </button>
         </div>
       </header>
@@ -374,7 +414,11 @@
   <!-- JAVASCRIPT APP LOGIC -->
   <script>
     // App State Manager
-    let memory = JSON.parse(localStorage.getItem('mrai_pro') || '{"pace": "normal", "solved": 0, "streak": 1, "lastSolvedDate": ""}');
+    let memory = JSON.parse(localStorage.getItem('mrai_pro') || '{"pace": "normal", "solved": 0, "streak": 1, "lastSolvedDate": "", "userEmail": "lichianukem6@gmail.com"}');
+    memory.userEmail = memory.userEmail || "lichianukem6@gmail.com";
+    memory.solved = memory.solved || 0;
+    memory.streak = memory.streak || 1;
+    
     let history = [];
     let cur = {};
     let thImgs = [];
@@ -390,6 +434,16 @@
     const statsSolvedEl = document.getElementById('statsSolved');
     const statsStreakEl = document.getElementById('statsStreak');
     const paceBadgeEl = document.getElementById('paceBadge');
+
+    // Profile & Progression DOM Elements
+    const studentEmailValEl = document.getElementById('studentEmailVal');
+    const emailInputEl = document.getElementById('emailInput');
+    const emailDisplayAreaEl = document.getElementById('emailDisplayArea');
+    const emailEditAreaEl = document.getElementById('emailEditArea');
+    
+    const progressionLevelBadgeEl = document.getElementById('progressionLevelBadge');
+    const progressionPercentEl = document.getElementById('progressionPercent');
+    const progressionBarEl = document.getElementById('progressionBar');
 
     // UI State Helpers
     function updateDashboard() {
@@ -413,6 +467,78 @@
         paceBadgeEl.className = memory.pace === 'slow'
           ? "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-rose/15 text-accent-rose border border-accent-rose/30"
           : "text-xs px-2.5 py-0.5 rounded-full font-bold bg-accent-blue/15 text-accent-blue border border-accent-blue/30";
+      }
+
+      // Update student email profile display
+      if (studentEmailValEl) {
+        studentEmailValEl.textContent = memory.userEmail || "lichianukem6@gmail.com";
+      }
+
+      // Compute Academic Level & progression bar metrics (10 solved per level)
+      const solvedCount = memory.solved || 0;
+      const calculatedLevel = Math.floor(solvedCount / 10) + 1;
+      let titleName = "Novice Solver";
+      if (calculatedLevel === 2) titleName = "Apprentice Scholar";
+      else if (calculatedLevel === 3) titleName = "Competent Practician";
+      else if (calculatedLevel === 4) titleName = "Expert Analyst";
+      else if (calculatedLevel === 5) titleName = "Master Calculist";
+      else if (calculatedLevel > 5) titleName = "Grandmaster Polymath";
+
+      if (progressionLevelBadgeEl) {
+        progressionLevelBadgeEl.textContent = `Lvl ${calculatedLevel}: ${titleName}`;
+      }
+
+      const barProgressPercent = (solvedCount % 10) * 10;
+      if (progressionPercentEl) {
+        progressionPercentEl.textContent = `${barProgressPercent}%`;
+      }
+      if (progressionBarEl) {
+        progressionBarEl.style.width = `${barProgressPercent}%`;
+      }
+    }
+
+    // Editable Student Email operations
+    function enableEmailEdit() {
+      if (emailDisplayAreaEl && emailEditAreaEl && emailInputEl) {
+        emailInputEl.value = memory.userEmail || "lichianukem6@gmail.com";
+        emailDisplayAreaEl.classList.add('hidden');
+        emailEditAreaEl.classList.remove('hidden');
+        emailEditAreaEl.classList.add('flex');
+      }
+    }
+
+    function cancelEmailEdit() {
+      if (emailDisplayAreaEl && emailEditAreaEl) {
+        emailEditAreaEl.classList.add('hidden');
+        emailEditAreaEl.classList.remove('flex');
+        emailDisplayAreaEl.classList.remove('hidden');
+      }
+    }
+
+    function saveStudentEmail() {
+      if (emailInputEl) {
+        const value = emailInputEl.value.trim();
+        if (!value || !value.includes('@')) {
+          alert('Please input a valid email address!');
+          return;
+        }
+        memory.userEmail = value;
+        localStorage.setItem('mrai_pro', JSON.stringify(memory));
+        updateDashboard();
+        cancelEmailEdit();
+        addMsg(`👤 **Profile Updated:** Student email is successfully configured to **${value}**.\n\nAll subsequent academic metrics will be securely saved under this profile.`, 'bot');
+      }
+    }
+
+    // Reset Academic Progression
+    function resetAcademicProgression() {
+      if (confirm('Are you sure you want to reset your academic level, solved stats, and streak counters back to baseline?')) {
+        memory.solved = 0;
+        memory.streak = 1;
+        memory.lastSolvedDate = "";
+        localStorage.setItem('mrai_pro', JSON.stringify(memory));
+        updateDashboard();
+        addMsg(`🔄 **Progression Reset:** Your academic record has been reset back to Level 1 (0 solved questions). Keep up the daily practice to rise through the scholar levels!`, 'bot');
       }
     }
 
@@ -888,11 +1014,138 @@
       }
     }
 
+    // Curriculum subject database with only math, fmath, physics, and chemistry calculation-focused topics
+    const SUBJECTS = {
+      math: {
+        name: "Mathematics",
+        color: "text-accent-violet",
+        topics: [
+          { id: "quadratic", name: "Quadratic Solver", desc: "Algebra (ax² + bx + c = 0)", action: "Quadratic formula equation calculations" },
+          { id: "linear", name: "Simultaneous Equations", desc: "Algebra (2 Variables)", action: "Solving simultaneous linear equations calculations" },
+          { id: "trig", name: "Trigonometric Calculations", desc: "Trig (Sine & Cosine Rules)", action: "Trigonometric side and angle calculations using sine and cosine laws" },
+          { id: "stats", name: "Statistics Calculator", desc: "Data (Mean, Variance & SD)", action: "Mean, variance and standard deviation calculations for dataset" },
+          { id: "calculus_diff", name: "Differentiation Solver", desc: "Calculus (Power & Product Rule)", action: "Calculus derivative calculations with power, product and chain rules" },
+          { id: "calculus_int", name: "Definite Integration", desc: "Calculus (Area Under Curve)", action: "Calculus definite integral calculations and area computation" }
+        ]
+      },
+      fmath: {
+        name: "Further Mathematics",
+        color: "text-accent-rose",
+        topics: [
+          { id: "matrix", name: "Matrix Calculations", desc: "Algebra (Determinant & Inverse)", action: "Matrix multiplication, determinant, and inverse matrix calculations" },
+          { id: "complex", name: "Complex Arithmetic", desc: "Numbers (Modulus & Polar Form)", action: "Complex numbers arithmetic, modulus, and polar coordinates calculations" },
+          { id: "vectors", name: "3D Vector Calculator", desc: "Geometry (Dot & Cross Product)", action: "3D vector dot product, cross product, and magnitude calculations" },
+          { id: "ode", name: "Differential Equations", desc: "Calculus (1st Order Separable)", action: "First-order separable differential equations calculations" }
+        ]
+      },
+      physics: {
+        name: "Physics",
+        color: "text-accent-blue",
+        topics: [
+          { id: "ohms_law", name: "Ohm's & Resistance", desc: "Circuits (V = IR)", action: "Ohm's law and series/parallel resistor calculations" },
+          { id: "mechanics", name: "Newton's Second Law", desc: "Forces (F = ma)", action: "Newtonian mechanics force, acceleration, and mass calculations" },
+          { id: "kinematics", name: "SUVAT Equations", desc: "Motion (Constant Acceleration)", action: "SUVAT kinematic equations of motion calculations" },
+          { id: "thermo", name: "Specific Heat Solver", desc: "Thermal (Q = mcΔT)", action: "Specific heat capacity thermal energy calculations" },
+          { id: "optics", name: "Snell's Law & Refraction", desc: "Waves (Refractive Index)", action: "Snell's Law light refraction index and angle calculations" },
+          { id: "decay", name: "Half-Life & Decay", desc: "Nuclear (Exponential Decay)", action: "Radioactive isotope half-life and exponential decay calculations" }
+        ]
+      },
+      chemistry: {
+        name: "Chemistry",
+        color: "text-accent-emerald",
+        topics: [
+          { id: "mole", name: "Mole Calculations", desc: "Stoichiometry (n = m/M)", action: "Chemical moles, stoichiometry, and concentration calculations" },
+          { id: "ph", name: "pH & pOH Calculator", desc: "Acids (pH = -log[H+])", action: "Acid-base pH, pOH, and hydrogen ion concentration calculations" },
+          { id: "gas_laws", name: "Ideal Gas Law", desc: "Gases (PV = nRT)", action: "Ideal gas equation PV = nRT property calculations" },
+          { id: "kinetics", name: "Arrhenius Solver", desc: "Kinetics (Activation Energy)", action: "Reaction rate laws and Arrhenius activation energy calculations" },
+          { id: "electro", name: "Electrolysis Stoichiometry", desc: "Electrochem (Faraday's Laws)", action: "Electrochemical cell potential and Faraday's laws of electrolysis calculations" }
+        ]
+      }
+    };
+
+    function backToChat() {
+      // Hide sidebar drawer on mobile devices
+      if (window.innerWidth < 768) {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+          sidebar.classList.add('hidden');
+          sidebar.classList.remove('flex');
+        }
+      }
+      
+      // Scroll main chat container to the bottom
+      const chatEl = document.getElementById('chat');
+      if (chatEl) {
+        chatEl.scrollTop = chatEl.scrollHeight;
+      }
+      
+      // Auto-focus message input composers
+      const inp = document.getElementById('msg');
+      if (inp) {
+        inp.focus();
+      }
+    }
+
+    function initCurriculum() {
+      renderCurriculum();
+    }
+
+    function renderCurriculum() {
+      const subject = document.getElementById('curriculumSubject').value;
+      const search = document.getElementById('curriculumSearch').value.toLowerCase().trim();
+      const container = document.getElementById('curriculumContainer');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      let itemsToRender = [];
+      
+      // Hydrate standard database subject topics
+      Object.keys(SUBJECTS).forEach(sKey => {
+        if (subject === 'all' || subject === sKey) {
+          SUBJECTS[sKey].topics.forEach(t => {
+            itemsToRender.push({ ...t, subjectKey: sKey, color: SUBJECTS[sKey].color });
+          });
+        }
+      });
+      
+      // Apply Search matching filter across keywords and tags
+      if (search) {
+        itemsToRender = itemsToRender.filter(item => 
+          item.name.toLowerCase().includes(search) || 
+          (item.desc && item.desc.toLowerCase().includes(search)) ||
+          item.action.toLowerCase().includes(search)
+        );
+      }
+      
+      // Handle empty search scenarios
+      if (itemsToRender.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 px-3 bg-space-850/40 rounded-xl border border-space-800">
+            <span class="text-xs text-slate-400 block font-medium">No matching topics found</span>
+          </div>`;
+        return;
+      }
+      
+      // Dynamically instantiate topic widgets as simple, clickable buttons with no mastery checkboxes
+      itemsToRender.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = "p-1 bg-space-850 bg-opacity-60 border border-space-800 rounded-lg hover:border-space-700 hover:bg-space-800 transition";
+        itemDiv.innerHTML = `
+          <button onclick="quickAction('${item.action}')" class="w-full text-left text-xs p-2 flex flex-col justify-center min-w-0">
+            <span class="truncate font-medium text-slate-200" title="${item.name}">${item.name}</span>
+            <span class="text-[9px] font-mono opacity-85 truncate ${item.color}">${item.desc}</span>
+          </button>
+        `;
+        container.appendChild(itemDiv);
+      });
+    }
+
     // App Initialization
     window.onload = () => {
       // Welcome Greet
       addMsg("Hello and welcome!\n\nI am **MR.AI** — your specialized professional tutor for high-level **Mathematics, Further Mathematics, Physics, and Chemistry calculations**.\n\nLet's master some academic formulas today. What topic, equation, or worksheet are we starting with?", "bot");
       updateDashboard();
+      initCurriculum();
 
       // Menu Toggle Listener
       menuBtn.onclick = (e) => {

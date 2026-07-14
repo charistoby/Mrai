@@ -178,6 +178,7 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
       const gender = memory.gender || "Male";
       const assimilation = memory.assimilation || "Bite-Sized & Step-by-Step";
       const level = Math.floor((memory.solved || 0) / 10) + 1;
+      const pace = memory.pace || "default";
 
       studentProfilePrompt = `\n\nYou are teaching a student with the following profile:
 - **Student Name**: ${name}
@@ -185,6 +186,7 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
 - **Age**: ${age} years old
 - **Gender**: ${gender}
 - **Explanation Style**: ${assimilation}
+- **Current Teaching Pace**: ${pace} (Options: default, slow, moderate, advanced, fast)
 
 CRITICAL ADAPTATION DIRECTIONS:
 1. Address the student by name ("${name}") occasionally when providing encouragement.
@@ -192,14 +194,20 @@ CRITICAL ADAPTATION DIRECTIONS:
 3. Align your tutoring speed with their Explanation Style ("${assimilation}"):
    - If "Bite-Sized & Step-by-Step", output one logical micro-step at a time and ask if they are ready for the next one.
    - If "Visual Analogies & Examples", explain formulas using real-world objects, physics mechanics, and intuitive mental models first.
-   - If "Formula-Dense & Rigorous", skip simple math steps and focus on high-level mathematical formulas and proofs.`;
+   - If "Formula-Dense & Rigorous", skip simple math steps and focus on high-level mathematical formulas and proofs.
+4. Strictly respect their Teaching Pace ("${pace}"):
+   - If "slow", write with extreme detail, explain every single arithmetic operation, break down variables, and teach in small bite-sized increments. Ask confirming questions after each calculation step.
+   - If "moderate", provide comprehensive explanation with standard steps.
+   - If "advanced", skip basic arithmetic and algebra simplifications; focus on complex formulas and advanced steps.
+   - If "fast", deliver direct answers and final equations with minimal fluff and maximum efficiency.
+   - If "default", provide a standard balanced academic pace.`;
     }
 
     const systemInstruction = `You are MR.AI, a highly expert and supportive professional tutor in Mathematics, Further Mathematics, Chemistry, and Physics calculations.
 Guidelines:
 1. Always format mathematical formulas using clean standard TeX inside $...$ (e.g. $y = mx + c$, $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$).
 2. Speak clearly, direct to the point, and friendly.
-3. Be supportive. If the user's pace in memory is 'slow', teach in smaller, bite-sized step-by-step increments.${studentProfilePrompt}`;
+3. Be supportive and align your teaching pace carefully with the student's profile pace.${studentProfilePrompt}`;
 
     try {
       const contents = [
@@ -319,7 +327,10 @@ Guidelines:
 
   // Quiz generation remains structured JSON
   const systemInstruction = isObj
-    ? `You are MR.AI professional question setter. Topic: "${message}". Create exactly 10 high-quality objective questions testing mathematical, scientific, or physics calculations. 
+    ? `You are MR.AI professional question setter. Topic: "${message}". 
+CRITICAL TOPIC REQUIREMENT: You MUST ONLY generate questions that are directly and strictly about the specified topic: "${message}". DO NOT include questions from any other unrelated domains, subjects, or general science topics. Every single question must be a calculation or problem directly on "${message}".
+
+Create exactly 10 high-quality objective questions testing mathematical, scientific, or physics calculations. 
 Return ONLY JSON with this format:
 {
   "type": "quiz",
@@ -330,12 +341,15 @@ Return ONLY JSON with this format:
       "question": "A resistor of resistance $R$ is connected to...",
       "options": ["$3\\Omega$", "$6\\Omega$", "$9\\Omega$", "$12\\Omega$"],
       "correct": "B",
-      "topic": "Electricity"
+      "topic": "${message}"
     }
   }
 }
 IMPORTANT: Make sure every option is wrapped in $...$ and contains mathematical symbols. Put the actual calculation values in the options, and you MUST provide the correct option letter ("A", "B", "C", or "D") in the "correct" field of each question in the generated JSON. All math must be in standard TeX format wrapped in $...$.`
-    : `You are MR.AI theory question setter. Topic: "${message}". Create theory questions. 
+    : `You are MR.AI theory question setter. Topic: "${message}".
+CRITICAL TOPIC REQUIREMENT: You MUST ONLY generate questions that are directly and strictly about the specified topic: "${message}". DO NOT include questions from any other unrelated domains, subjects, or general science topics. Every single question must be a calculation or problem directly on "${message}".
+
+Create theory questions. 
 Return ONLY JSON:
 {
   "type": "theory_quiz",

@@ -23,8 +23,15 @@ app.use((req, res, next) => {
 
 // Helper to parse base64 image data URLs
 function parseDataUrl(dataUrl: string) {
-  const matches = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+  const matches = dataUrl.match(/^data:([^;]+);(?:[^,]*?)base64,(.+)$/);
   if (!matches) {
+    if (!dataUrl.includes("data:") && !dataUrl.includes(";base64,")) {
+      return { mimeType: "image/jpeg", data: dataUrl };
+    }
+    const commaIndex = dataUrl.indexOf(",");
+    if (commaIndex !== -1) {
+      return { mimeType: "image/jpeg", data: dataUrl.substring(commaIndex + 1) };
+    }
     return { mimeType: "image/jpeg", data: dataUrl };
   }
   return {
@@ -281,7 +288,7 @@ Guidelines:
       }
 
       // 2. MULTI-MODEL GEMINI FALLBACK CASCADE
-      const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+      const geminiModels = [DEFAULT_MODEL, "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.1-pro-preview"];
       let responseStream;
       let lastErr;
 
@@ -325,12 +332,16 @@ Guidelines:
     }
   }
 
+  // Parse requested number of questions
+  const qsMatch = message.match(/Qs:\s*(\d+)/i);
+  const numQsRequested = qsMatch ? parseInt(qsMatch[1], 10) : (isObj ? 10 : 5);
+
   // Quiz generation remains structured JSON
   const systemInstruction = isObj
     ? `You are MR.AI professional question setter. Topic: "${message}". 
 CRITICAL TOPIC REQUIREMENT: You MUST ONLY generate questions that are directly and strictly about the specified topic: "${message}". DO NOT include questions from any other unrelated domains, subjects, or general science topics. Every single question must be a calculation or problem directly on "${message}".
 
-Create exactly 10 high-quality objective questions testing mathematical, scientific, or physics calculations. 
+Create exactly ${numQsRequested} high-quality objective questions testing mathematical, scientific, or physics calculations. 
 Return ONLY JSON with this format:
 {
   "type": "quiz",
@@ -349,7 +360,7 @@ IMPORTANT: Make sure every option is wrapped in $...$ and contains mathematical 
     : `You are MR.AI theory question setter. Topic: "${message}".
 CRITICAL TOPIC REQUIREMENT: You MUST ONLY generate questions that are directly and strictly about the specified topic: "${message}". DO NOT include questions from any other unrelated domains, subjects, or general science topics. Every single question must be a calculation or problem directly on "${message}".
 
-Create theory questions. 
+Create exactly ${numQsRequested} high-quality complex theory questions (with sub-questions like 1a, 1b, 1c, with sub-parts like i, ii, iii, etc., to make them highly professional, academic and comprehensive). 
 Return ONLY JSON:
 {
   "type": "theory_quiz",
@@ -357,8 +368,8 @@ Return ONLY JSON:
   "testData": {
     "1": {
       "qid": 1,
-      "question": "An object of mass $5kg$ accelerates at $3m/s^2$. Calculate the force acting on it.",
-      "mark": "5 marks"
+      "question": "An object of mass $5kg$ accelerates at $3m/s^2$. (a) Calculate the force acting on it. (b) If the force is doubled, find the new acceleration.",
+      "mark": "10 marks"
     }
   }
 }`;
@@ -406,7 +417,7 @@ Return ONLY JSON:
     }
 
     if (!responseText) {
-      const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+      const geminiModels = [DEFAULT_MODEL, "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.1-pro-preview"];
       let lastErr;
       for (const modelName of geminiModels) {
         try {
@@ -484,10 +495,10 @@ app.post("/api/vision", async (req: express.Request, res: express.Response) => {
     return res.status(400).json({ type: "chat", reply: "No image received. Try again." });
   }
 
-  const validImgs = imgs.slice(0, 5).filter((i: any) => typeof i === "string" && i.startsWith("data:image"));
+  const validImgs = imgs.slice(0, 5).filter((i: any) => typeof i === "string" && (i.startsWith("data:") || i.length > 100));
 
   if (!validImgs.length) {
-    return res.status(400).json({ type: "chat", reply: "Invalid image format. Please retake photo." });
+    return res.status(400).json({ type: "chat", reply: "No valid image data detected. Please try uploading again." });
   }
 
   const SYSTEM_PROMPT = `
@@ -554,7 +565,7 @@ Student Memory Profile: ${JSON.stringify(memory).slice(0, 500)}
       },
     ];
 
-    const geminiModels = [DEFAULT_MODEL, "gemini-1.5-pro", "gemini-2.5-flash", "gemini-3.1-flash-lite"];
+    const geminiModels = [DEFAULT_MODEL, "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-3.1-pro-preview"];
     let response;
     let lastErr;
 
@@ -580,7 +591,14 @@ Student Memory Profile: ${JSON.stringify(memory).slice(0, 500)}
     }
 
     const contentText = response.text || "{}";
-    const parsed = safeParseJSON(contentText);
+    let parsed = safeParseJSON(contentText);
+    if (!parsed || (typeof parsed === "object" && !parsed.reply)) {
+      if (contentText.trim().startsWith("{") || contentText.trim().startsWith("[")) {
+        parsed = { type: "chat", reply: "Sorry, I had trouble parsing the layout of your assignment. Please write down the details directly in the chat!" };
+      } else {
+        parsed = { type: "chat", reply: contentText };
+      }
+    }
     return res.status(200).json(parsed);
   } catch (err) {
     console.error("Vision API error:", err);

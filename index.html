@@ -108,10 +108,13 @@
 </head>
 <body class="bg-space-950 text-slate-100 font-sans h-[100dvh] w-screen overflow-hidden antialiased">
 
-  <div class="flex h-full w-full flex-col">
+  <div class="flex h-full w-full md:flex-row flex-col relative overflow-hidden">
     
+    <!-- Sidebar Backdrop Overlay for Mobile -->
+    <div id="sidebarBackdrop" onclick="backToChat()" class="hidden fixed inset-0 bg-black/60 z-30 transition-opacity duration-300 ease-out opacity-0 pointer-events-none md:hidden"></div>
+
     <!-- ACADEMIC PROGRESSION TAB: Stats Dashboard & Profile (Toggled via Menu Icon) -->
-    <aside id="sidebar" class="hidden w-full h-full flex-col bg-space-900 shrink-0">
+    <aside id="sidebar" class="hidden md:flex fixed md:static inset-y-0 left-0 z-40 w-full sm:max-w-xs md:w-80 h-full flex-col bg-space-900 border-r border-space-800 shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
       <!-- Sidebar Header -->
       <div class="p-5 border-b border-space-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
@@ -413,7 +416,7 @@
             <span class="text-xs text-slate-400">Number of Questions</span>
             <span id="qN" class="text-sm font-bold text-accent-violet font-mono">10</span>
           </div>
-          <input type="range" id="qR" min="5" max="30" value="10" oninput="qN.textContent=this.value" class="w-full accent-accent-violet bg-space-950 h-1 rounded-lg cursor-pointer">
+          <input type="range" id="qR" min="10" max="40" value="10" oninput="qN.textContent=this.value" class="w-full accent-accent-violet bg-space-950 h-1 rounded-lg cursor-pointer">
         </div>
 
         <!-- Theory Range Selection -->
@@ -422,7 +425,7 @@
             <span class="text-xs text-slate-400">Theory Questions</span>
             <span id="tN" class="text-sm font-bold text-accent-violet font-mono">5</span>
           </div>
-          <input type="range" id="tR" min="2" max="8" value="5" oninput="tN.textContent=this.value" class="w-full accent-accent-violet bg-space-950 h-1 rounded-lg cursor-pointer">
+          <input type="range" id="tR" min="2" max="7" value="5" oninput="tN.textContent=this.value" class="w-full accent-accent-violet bg-space-950 h-1 rounded-lg cursor-pointer">
         </div>
 
         <!-- Action Button -->
@@ -1088,7 +1091,8 @@
                       ? 'bg-gradient-to-tr from-accent-violet to-space-600 text-white border border-accent-violet/30 rounded-tr-sm font-medium' 
                       : 'bg-space-900 border border-space-800 text-slate-100 rounded-tl-sm');
 
-      let h = text
+      let safeText = text === null || text === undefined ? "" : String(text);
+      let h = safeText
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1315,8 +1319,19 @@
 
     function cDone() {
       if (!window.currentCropper) return;
-      const canvas = window.currentCropper.getCroppedCanvas({ maxWidth: 1600 });
-      window._cropCallback(canvas.toDataURL('image/jpeg', 0.88));
+      let dataUrl = "";
+      try {
+        const canvas = window.currentCropper.getCroppedCanvas({ maxWidth: 1600 });
+        if (canvas) {
+          dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        }
+      } catch (err) {
+        console.error("Cropper canvas generation failed:", err);
+      }
+      if (!dataUrl) {
+        dataUrl = document.getElementById('cImg').src;
+      }
+      window._cropCallback(dataUrl);
       cCancel();
     }
 
@@ -1588,23 +1603,45 @@
 
     function showAcademicTab() {
       const sidebar = document.getElementById('sidebar');
-      const main = document.querySelector('main');
-      if (sidebar && main) {
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) {
         sidebar.classList.remove('hidden');
-        sidebar.classList.add('flex');
-        main.classList.add('hidden');
-        main.classList.remove('flex');
+        setTimeout(() => {
+          sidebar.classList.remove('-translate-x-full');
+        }, 10);
+      }
+      if (backdrop) {
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+          backdrop.classList.remove('opacity-0', 'pointer-events-none');
+          backdrop.classList.add('opacity-100', 'pointer-events-auto');
+        }, 10);
       }
     }
 
     function backToChat() {
       const sidebar = document.getElementById('sidebar');
-      const main = document.querySelector('main');
-      if (sidebar && main) {
-        sidebar.classList.add('hidden');
-        sidebar.classList.remove('flex');
-        main.classList.remove('hidden');
-        main.classList.add('flex');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) {
+        if (window.innerWidth < 768) {
+          sidebar.classList.add('-translate-x-full');
+          setTimeout(() => {
+            if (sidebar.classList.contains('-translate-x-full')) {
+              sidebar.classList.add('hidden');
+            }
+          }, 300);
+        } else {
+          sidebar.classList.toggle('hidden');
+        }
+      }
+      if (backdrop) {
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+        setTimeout(() => {
+          if (backdrop.classList.contains('opacity-0')) {
+            backdrop.classList.add('hidden');
+          }
+        }, 300);
       }
       
       // Scroll main chat container to the bottom

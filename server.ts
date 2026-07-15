@@ -236,7 +236,7 @@ app.post("/api/chat", async (req: express.Request, res: express.Response) => {
 
     let studentProfilePrompt = "";
     if (memory && typeof memory === "object") {
-      const name = memory.studentName || "T-boy";
+      const name = memory.studentName || memory.idNo || "Student";
       const classLevel = memory.classLevel || "High School / SSS";
       const age = memory.age || 17;
       const gender = memory.gender || "Male";

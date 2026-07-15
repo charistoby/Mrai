@@ -640,13 +640,24 @@
   <script>
     // App State Manager
     let memory = JSON.parse(localStorage.getItem('mrai_pro') || '{}');
-    memory.userEmail = memory.userEmail || "lichianukem6@gmail.com";
-    memory.studentName = memory.studentName || "T-boy";
+    
+    // Check if we need to initialize a fresh user state (no idNo or old static idNo)
+    if (!memory.idNo || memory.idNo === "MRAI-5942-STU") {
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      memory.idNo = `MRAI-${rand}-STU`;
+    }
+    
+    // Clear legacy hardcoded "T-boy" name if it exists from previous sessions
+    if (memory.studentName === "T-boy") {
+      memory.studentName = "";
+    }
+    
+    memory.studentName = memory.studentName || "";
+    memory.userEmail = memory.userEmail || "student@mrai.edu";
     memory.gender = memory.gender || "Male";
     memory.classLevel = memory.classLevel || "High School / SSS";
     memory.age = memory.age || 17;
     memory.assimilation = memory.assimilation || "Bite-Sized & Step-by-Step";
-    memory.idNo = memory.idNo || "MRAI-5942-STU";
     memory.avatar = memory.avatar || "🎓";
     memory.solved = memory.solved || 0;
     memory.streak = memory.streak || 1;
@@ -758,9 +769,9 @@
       const cardAssimTag = document.getElementById('cardAssimTag');
       const cardAvatarIcon = document.getElementById('cardAvatarIcon');
 
-      if (cardName) cardName.textContent = memory.studentName || "T-boy";
-      if (cardEmail) cardEmail.textContent = memory.userEmail || "lichianukem6@gmail.com";
-      if (cardIdNo) cardIdNo.textContent = `ID: ${memory.idNo || "MRAI-5942-STU"}`;
+      if (cardName) cardName.textContent = memory.studentName || memory.idNo;
+      if (cardEmail) cardEmail.textContent = memory.userEmail || "student@mrai.edu";
+      if (cardIdNo) cardIdNo.textContent = `ID: ${memory.idNo}`;
       if (cardGenderTag) {
         cardGenderTag.textContent = (memory.gender || "Male").toUpperCase();
         if (memory.gender === 'Female') {
@@ -799,8 +810,8 @@
       const mAssimTag = document.getElementById('menuAssimTag');
       const mAvatarIcon = document.getElementById('menuAvatarIcon');
 
-      if (mName) mName.textContent = memory.studentName || "T-boy";
-      if (mIdNo) mIdNo.textContent = `ID: ${memory.idNo || "MRAI-5942-STU"}`;
+      if (mName) mName.textContent = memory.studentName || memory.idNo;
+      if (mIdNo) mIdNo.textContent = `ID: ${memory.idNo}`;
       if (mGenderTag) {
         mGenderTag.textContent = (memory.gender || "Male").toUpperCase();
         if (memory.gender === 'Female') {
@@ -838,8 +849,8 @@
       }
 
       // Load values into form fields from memory
-      document.getElementById('formName').value = memory.studentName || "T-boy";
-      document.getElementById('formEmail').value = memory.userEmail || "lichianukem6@gmail.com";
+      document.getElementById('formName').value = memory.studentName || "";
+      document.getElementById('formEmail').value = memory.userEmail || "student@mrai.edu";
       document.getElementById('formGender').value = memory.gender || "Male";
       document.getElementById('formAge').value = memory.age || 17;
       document.getElementById('formClassLevel').value = memory.classLevel || "High School / SSS";
@@ -858,8 +869,8 @@
 
     // Sync live ID card preview inside modal
     function syncPreview() {
-      const name = document.getElementById('formName').value.trim() || "Student Scholar";
-      const email = document.getElementById('formEmail').value.trim() || "lichianukem6@gmail.com";
+      const name = document.getElementById('formName').value.trim() || memory.idNo;
+      const email = document.getElementById('formEmail').value.trim() || "student@mrai.edu";
       const gender = document.getElementById('formGender').value;
       const age = document.getElementById('formAge').value || "17";
       const classLevel = document.getElementById('formClassLevel').value;
@@ -925,22 +936,13 @@
     // Save Student ID values
     function saveStudentId() {
       const name = document.getElementById('formName').value.trim();
-      const email = document.getElementById('formEmail').value.trim();
+      const email = document.getElementById('formEmail').value.trim() || "student@mrai.edu";
       const gender = document.getElementById('formGender').value;
       const age = parseInt(document.getElementById('formAge').value, 10) || 17;
       const classLevel = document.getElementById('formClassLevel').value;
       const assimilation = document.getElementById('formAssimilation').value;
 
-      if (!name) {
-        alert('Please fill in your name!');
-        return;
-      }
-      if (!email || !email.includes('@')) {
-        alert('Please enter a valid email address!');
-        return;
-      }
-
-      memory.studentName = name;
+      memory.studentName = name; // Can be empty string
       memory.userEmail = email;
       memory.gender = gender;
       memory.age = age;
@@ -953,6 +955,8 @@
         window._tempIdNo = null;
       }
 
+      const displayName = memory.studentName || memory.idNo;
+
       // Automatically sync 'slow' pace if Bite-Sized style is chosen
       if (assimilation.includes('Bite-Sized')) {
         memory.pace = 'slow';
@@ -964,7 +968,7 @@
       updateDashboard();
       closeStudentIdModal();
 
-      addMsg(`🪪 **Student ID Card Saved:**\n\n- **Name**: ${name}\n- **Class**: ${classLevel}\n- **Assimilation**: ${assimilation}\n\nMR.AI has successfully synced your study profile and is now calibrating calculations for your precise academic stage!`, 'bot');
+      addMsg(`🪪 **Student ID Card Saved:**\n\n- **Name**: ${displayName}\n- **Class**: ${classLevel}\n- **Assimilation**: ${assimilation}\n\nMR.AI has successfully synced your study profile and is now calibrating calculations for your precise academic stage!`, 'bot');
     }
 
     // Reset Academic Progression
@@ -1406,6 +1410,23 @@
       if (!text) return;
       inp.value = '';
       addMsg(text, 'user');
+
+      // Extract student name from communication if they say "my name is X", "call me X", "I am X", "I'm X"
+      const nameRegex = /(?:my name is|call me|i am|i'm|this is)\s+([a-zA-Z][a-zA-Z0-9\-_]{1,15})(?:\b|\s|\.|!|\?|$)/i;
+      const match = text.match(nameRegex);
+      if (match && match[1]) {
+        const detectedName = match[1].trim();
+        const capitalizedName = detectedName.charAt(0).toUpperCase() + detectedName.slice(1);
+        const lowercaseName = capitalizedName.toLowerCase();
+        // Skip common words or the name of the assistant
+        const skippedWords = ["mr", "ai", "mrai", "ready", "here", "new", "student", "good", "fine", "ok", "yes", "no", "going", "doing", "solved", "level", "learning", "studying"];
+        if (!skippedWords.includes(lowercaseName)) {
+          memory.studentName = capitalizedName;
+          localStorage.setItem('mrai_pro', JSON.stringify(memory));
+          updateDashboard();
+        }
+      }
+
       sendDirect(text);
     }
 

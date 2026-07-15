@@ -108,13 +108,13 @@
 </head>
 <body class="bg-space-950 text-slate-100 font-sans h-[100dvh] w-screen overflow-hidden antialiased">
 
-  <div class="flex h-full w-full md:flex-row flex-col relative overflow-hidden">
+  <div class="flex h-full w-full lg:flex-row flex-col relative overflow-hidden">
     
     <!-- Sidebar Backdrop Overlay for Mobile -->
-    <div id="sidebarBackdrop" onclick="backToChat()" class="hidden fixed inset-0 bg-black/60 z-30 transition-opacity duration-300 ease-out opacity-0 pointer-events-none md:hidden"></div>
+    <div id="sidebarBackdrop" onclick="backToChat()" class="hidden fixed inset-0 bg-black/60 z-30 transition-opacity duration-300 ease-out opacity-0 pointer-events-none lg:hidden"></div>
 
     <!-- ACADEMIC PROGRESSION TAB: Stats Dashboard & Profile (Toggled via Menu Icon) -->
-    <aside id="sidebar" class="hidden md:flex fixed md:static inset-y-0 left-0 z-40 w-full sm:max-w-xs md:w-80 h-full flex-col bg-space-900 border-r border-space-800 shrink-0 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-out">
+    <aside id="sidebar" class="hidden lg:flex fixed lg:static inset-y-0 left-0 z-40 w-full sm:max-w-xs lg:w-80 h-full flex-col bg-space-900 border-r border-space-800 shrink-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-out">
       <!-- Sidebar Header -->
       <div class="p-5 border-b border-space-800 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-3">
@@ -1644,7 +1644,7 @@
       const sidebar = document.getElementById('sidebar');
       const backdrop = document.getElementById('sidebarBackdrop');
       if (sidebar) {
-        if (window.innerWidth < 768) {
+        if (window.innerWidth < 1024) {
           sidebar.classList.add('-translate-x-full');
           setTimeout(() => {
             if (sidebar.classList.contains('-translate-x-full')) {

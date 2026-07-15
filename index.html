@@ -361,7 +361,7 @@
             </div>
 
             <!-- Hidden File Inputs -->
-            <input type="file" id="camI" accept="image/*" capture="environment" class="hidden">
+            <input type="file" id="camI" accept="image/*" class="hidden">
             <input type="file" id="galI" accept="image/*" multiple class="hidden">
             <input type="file" id="thI" accept="image/*" multiple class="hidden">
 
@@ -1086,22 +1086,38 @@
       msgWrapper.className = 'flex ' + (who === 'user' ? 'justify-end' : 'justify-start') + ' animate-slide-in';
       
       const d = document.createElement('div');
-      d.className = 'msg rounded-2xl max-w-[85%] md:max-w-[75%] px-5 py-4 shadow-xl text-sm leading-relaxed ' + 
-                    (who === 'user' 
-                      ? 'bg-gradient-to-tr from-accent-violet to-space-600 text-white border border-accent-violet/30 rounded-tr-sm font-medium' 
-                      : 'bg-space-900 border border-space-800 text-slate-100 rounded-tl-sm');
+      const isImgMsg = typeof text === 'string' && text.trim().startsWith('<div') && text.includes('<img');
+
+      if (isImgMsg) {
+        d.className = 'msg rounded-2xl max-w-[85%] md:max-w-[75%] overflow-hidden shadow-xl border border-space-800 bg-space-900';
+      } else {
+        d.className = 'msg rounded-2xl max-w-[85%] md:max-w-[75%] px-5 py-4 shadow-xl text-sm leading-relaxed ' + 
+                      (who === 'user' 
+                        ? 'bg-gradient-to-tr from-accent-violet to-space-600 text-white border border-accent-violet/30 rounded-tr-sm font-medium' 
+                        : 'bg-space-900 border border-space-800 text-slate-100 rounded-tl-sm');
+      }
 
       let safeText = text === null || text === undefined ? "" : String(text);
-      let h = safeText
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\n/g, '<br>');
+      let h = "";
+      if (isImgMsg) {
+        h = safeText;
+      } else {
+        h = safeText
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\n/g, '<br>');
+      }
 
       // Support basic tags
       h = h.replace(/&lt;u&gt;/g, '<u>').replace(/&lt;\/u&gt;/g, '</u>')
            .replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>')
            .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+
+      // Normalize LaTeX / unit symbols for clean display
+      h = h.replace(/\\?Omega/gi, 'Ω')
+           .replace(/\\?textV/gi, 'V')
+           .replace(/\\?text{V}/gi, 'V');
 
       if (data) {
         cur = data;
@@ -1475,6 +1491,11 @@
               h = h.replace(/&lt;u&gt;/g, '<u>').replace(/&lt;\/u&gt;/g, '</u>')
                    .replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>')
                    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+
+              // Normalize LaTeX / unit symbols for clean display
+              h = h.replace(/\\?Omega/gi, 'Ω')
+                   .replace(/\\?textV/gi, 'V')
+                   .replace(/\\?text{V}/gi, 'V');
                    
               textContainer.innerHTML = h;
               chatEl.scrollTop = chatEl.scrollHeight;

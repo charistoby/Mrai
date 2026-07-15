@@ -40,6 +40,63 @@ function parseDataUrl(dataUrl: string) {
   };
 }
 
+// Helpers to sanitize and build non-duplicate, role-alternating chat message arrays
+function buildCleanGroqMessages(systemInstruction: string, history: any[], latestMessage: string) {
+  const messages: { role: string; content: string }[] = [];
+  if (systemInstruction) {
+    messages.push({ role: "system", content: systemInstruction });
+  }
+
+  const raw: { role: string; content: string }[] = [];
+  for (const h of history) {
+    if (!h.content) continue;
+    const role = h.role === "model" || h.role === "assistant" ? "assistant" : "user";
+    raw.push({ role, content: h.content });
+  }
+
+  const lastRaw = raw[raw.length - 1];
+  if (!lastRaw || lastRaw.role !== "user" || lastRaw.content.trim() !== latestMessage.trim()) {
+    raw.push({ role: "user", content: latestMessage });
+  }
+
+  for (const msg of raw) {
+    const prev = messages[messages.length - 1];
+    if (prev && prev.role !== "system" && prev.role === msg.role) {
+      prev.content += "\n" + msg.content;
+    } else {
+      messages.push({ ...msg });
+    }
+  }
+
+  return messages;
+}
+
+function buildCleanGeminiContents(history: any[], latestMessage: string) {
+  const raw: { role: "user" | "model"; content: string }[] = [];
+  for (const h of history) {
+    if (!h.content) continue;
+    const role = h.role === "assistant" || h.role === "model" ? "model" : "user";
+    raw.push({ role, content: h.content });
+  }
+
+  const lastRaw = raw[raw.length - 1];
+  if (!lastRaw || lastRaw.role !== "user" || lastRaw.content.trim() !== latestMessage.trim()) {
+    raw.push({ role: "user", content: latestMessage });
+  }
+
+  const contents: { role: "user" | "model"; parts: { text: string }[] }[] = [];
+  for (const msg of raw) {
+    const prev = contents[contents.length - 1];
+    if (prev && prev.role === msg.role) {
+      prev.parts[0].text += "\n" + msg.content;
+    } else {
+      contents.push({ role: msg.role, parts: [{ text: msg.content }] });
+    }
+  }
+
+  return contents;
+}
+
 // ---------- LOCAL FALLBACK TEST GENERATOR (Graces rate/quota limits) ----------
 function getFallbackTest(message: string, isTheory: boolean) {
   const msg = message.toLowerCase();
@@ -213,17 +270,12 @@ CRITICAL ADAPTATION DIRECTIONS:
     const systemInstruction = `You are MR.AI, a highly expert and supportive professional tutor in Mathematics, Further Mathematics, Chemistry, and Physics calculations.
 Guidelines:
 1. Always format mathematical formulas using clean standard TeX inside $...$ (e.g. $y = mx + c$, $x = \\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}$).
-2. Speak clearly, direct to the point, and friendly.
-3. Be supportive and align your teaching pace carefully with the student's profile pace.${studentProfilePrompt}`;
+2. ALWAYS use the correct unit symbols (like 'Ω' or '\\Omega' for Ohms, 'V' for Volts, 'A' for Amperes). NEVER spell them out as words (like 'Omega' or 'Ohm') or write raw 'textV' / 'text{V}' inside formulas or replies.
+3. Speak clearly, direct to the point, and friendly.
+4. Be supportive and align your teaching pace carefully with the student's profile pace.${studentProfilePrompt}`;
 
     try {
-      const contents = [
-        ...history.map((h: any) => ({
-          role: h.role === "assistant" ? "model" : h.role,
-          parts: [{ text: h.content }],
-        })),
-        { role: "user", parts: [{ text: message }] },
-      ];
+      const contents = buildCleanGeminiContents(history, message);
 
       // 1. ATTEMPT GROQ STREAMING FIRST (IF API KEY AVAILABLE)
       if (process.env.GROQ_API_KEY) {
@@ -236,14 +288,7 @@ Guidelines:
             },
             body: JSON.stringify({
               model: "llama-3.3-70b-specdec",
-              messages: [
-                { role: "system", content: systemInstruction },
-                ...history.map((h: any) => ({
-                  role: h.role === "model" || h.role === "assistant" ? "assistant" : "user",
-                  content: h.content,
-                })),
-                { role: "user", content: message },
-              ],
+              messages: buildCleanGroqMessages(systemInstruction, history, message),
               stream: true,
             }),
           });
@@ -375,13 +420,7 @@ Return ONLY JSON:
 }`;
 
   try {
-    const contents = [
-      ...history.map((h: any) => ({
-        role: h.role === "assistant" ? "model" : h.role,
-        parts: [{ text: h.content }],
-      })),
-      { role: "user", parts: [{ text: message }] },
-    ];
+    const contents = buildCleanGeminiContents(history, message);
 
     let responseText = "";
     if (process.env.GROQ_API_KEY) {
@@ -394,14 +433,7 @@ Return ONLY JSON:
           },
           body: JSON.stringify({
             model: "llama-3.3-70b-specdec",
-            messages: [
-              { role: "system", content: systemInstruction },
-              ...history.map((h: any) => ({
-                role: h.role === "model" || h.role === "assistant" ? "assistant" : "user",
-                content: h.content,
-              })),
-              { role: "user", content: message },
-            ],
+            messages: buildCleanGroqMessages(systemInstruction, history, message),
             response_format: { type: "json_object" },
           }),
         });
@@ -532,8 +564,9 @@ Respond with a raw JSON structure:
 CRITICAL RULES:
 1. ONLY teach calculations and math-related science. If non-mathematical or non-scientific: {"type":"chat","reply":"I can only assist with Maths, Further Maths, Physics, and Chemistry calculations. Let's try one of those!"}
 2. ALL math/equations MUST be wrapped in TeX $...$ formatting (e.g. $V = I \\\\cdot R$, $E = mc^2$). Never use raw text for algebraic formulas.
-3. Use \\n for newline characters. Use ✅ and 🔴 for visual correction feedback.
-4. Always respond with a valid JSON object. No markdown fences around the JSON.
+3. ALWAYS use the correct unit symbols (like 'Ω' or '\\Omega' for Ohms, 'V' for Volts, 'A' for Amperes). NEVER spell them out as words (like 'Omega' or 'Ohm') or write raw 'textV' / 'text{V}' inside formulas or replies.
+4. Use \\n for newline characters. Use ✅ and 🔴 for visual correction feedback.
+5. Always respond with a valid JSON object. No markdown fences around the JSON.
 Student Memory Profile: ${JSON.stringify(memory).slice(0, 500)}
 `;
 

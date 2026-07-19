@@ -1,22 +1,20 @@
-import { SolverResult } from "../types";
-
 /**
- * Fallback verification system:
- * - Cross-check answers using multiple methods
- * - Request re-verification if answers don't match
- * - Use confidence scoring to flag uncertain answers
+ * Verification engine: Internal-only cross-checking
+ * Results stay internal, not exposed to users
  */
+
+import { SolverResult } from "../types";
 
 export interface VerificationResult {
   answer: number | null;
-  confidence: number; // 0-1
-  verificationMethod: string;
-  crossChecked: boolean;
-  discrepancies: string[];
+  confidence: number; // Internal only
+  verificationMethod: string; // Internal tracking
+  crossChecked: boolean; // Internal flag
+  discrepancies: string[]; // Internal notes
 }
 
 /**
- * Cross-check two solver methods
+ * Cross-check two solver methods (internal)
  */
 export async function crossVerifyAnswer(
   question: string,
@@ -38,7 +36,7 @@ export async function crossVerifyAnswer(
       return {
         answer: val1 as number,
         confidence: 0.95, // High confidence when both agree
-        verificationMethod: 'cross-verified (method 1 & 2)',
+        verificationMethod: 'cross-verified',
         crossChecked: true,
         discrepancies: []
       };
@@ -49,12 +47,12 @@ export async function crossVerifyAnswer(
         return {
           answer: (val1 + val2) / 2,
           confidence: 0.90,
-          verificationMethod: 'cross-verified (minor variance)',
+          verificationMethod: 'cross-verified-minor-variance',
           crossChecked: true,
-          discrepancies: [`Method 1: ${val1}, Method 2: ${val2} (${percentDiff.toFixed(2)}% difference)`]
+          discrepancies: [`Minor variance: ${percentDiff.toFixed(2)}%`]
         };
       } else {
-        discrepancies.push(`Method 1: ${val1}, Method 2: ${val2} (${percentDiff.toFixed(2)}% difference)`);
+        discrepancies.push(`Variance detected: ${percentDiff.toFixed(2)}%`);
       }
     }
   }
@@ -66,10 +64,10 @@ export async function crossVerifyAnswer(
       : method1Result.value;
     return {
       answer: val1 as number,
-      confidence: 0.75, // Lower confidence with single method
-      verificationMethod: 'method 1 only',
+      confidence: 0.75,
+      verificationMethod: 'primary-method',
       crossChecked: false,
-      discrepancies: ['Method 2 could not verify']
+      discrepancies: ['Secondary method unavailable']
     };
   }
 
@@ -80,9 +78,9 @@ export async function crossVerifyAnswer(
     return {
       answer: val2 as number,
       confidence: 0.75,
-      verificationMethod: 'method 2 only',
+      verificationMethod: 'secondary-method',
       crossChecked: false,
-      discrepancies: ['Method 1 could not verify']
+      discrepancies: ['Primary method unavailable']
     };
   }
 
@@ -92,25 +90,14 @@ export async function crossVerifyAnswer(
     confidence: 0,
     verificationMethod: 'none',
     crossChecked: false,
-    discrepancies: ['Both methods failed to solve']
+    discrepancies: ['Unable to verify']
   };
 }
 
 /**
- * Flag answers for manual review based on confidence
+ * Internal function: flag for admin/teacher review
  */
 export function shouldFlagForReview(confidence: number, hasWarnings: boolean): boolean {
   // Flag if confidence < 75% OR has warnings and confidence < 85%
   return confidence < 0.75 || (hasWarnings && confidence < 0.85);
-}
-
-/**
- * Generate confidence-based response hint
- */
-export function getConfidenceMessage(confidence: number): string {
-  if (confidence >= 0.95) return "✅ High confidence answer";
-  if (confidence >= 0.85) return "✓ Good confidence";
-  if (confidence >= 0.75) return "⚠️ Moderate confidence (verify if possible)";
-  if (confidence >= 0.65) return "⚠️ Low confidence (consider alternative methods)";
-  return "❌ Very low confidence (recommend manual review)";
 }

@@ -13,7 +13,7 @@ export const getI = (q: string): number | null => {
   const explicit = getNum(/I\s*=\s*(\d+\.?\d*)/i, q);
   if (explicit !== null) return explicit;
 
-  const withUnit = getNum(/(\d+\.?\d*)\s*A\b(?!.*using)/i, q);
+  const withUnit = getNum(/(\d+\.?\d*)\s*A(?!\s*hour)/i, q);
   if (withUnit !== null) return withUnit;
 
   // Search for last occurrence of current
@@ -78,7 +78,7 @@ export function solvePhysics(q: string): SolverResult {
   const force = fMatch ? parseFloat(fMatch[1]) : null;
 
   if (lq.includes("force") || lq.includes("find f") || lq.includes("calculate force")) {
-    if (mass !== null && acceleration !== null) {
+    if (mass !== null && mass !== 0 && acceleration !== null) {
       const val = mass * acceleration;
       return {
         solved: true,

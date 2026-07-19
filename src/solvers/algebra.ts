@@ -22,8 +22,14 @@ export function solveLinear(q: string): SolverResult {
       return Function('"use strict";return (' + e + ")")();
     };
 
-    const b0 = ev(0);
-    const b1 = ev(1);
+    let b0, b1;
+    try {
+      b0 = ev(0);
+      b1 = ev(1);
+    } catch {
+      return { solved: false };
+    }
+
     const a = b1 - b0;
     
     if (Math.abs(a) < 1e-9) {

@@ -60,8 +60,8 @@ export function safeParseJSON(text: string): any {
       
       if (inString) {
         if (escape) {
-          // Check if it's a valid standard JSON escape character: ", \, n, r, t, u
-          if (["\"", "\\", "n", "r", "t"].includes(char)) {
+          // Check if it's a valid standard JSON escape character: ", \, n, r, t, b, f, u
+          if (["\"" , "\\", "n", "r", "t", "b", "f"].includes(char)) {
             repaired += "\\" + char;
           } else if (char === "u") {
             const next4 = target.slice(i + 1, i + 5);

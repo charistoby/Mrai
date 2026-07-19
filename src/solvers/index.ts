@@ -2,27 +2,67 @@ import { SolverResult } from "../types";
 import { solveLinear, solveQuadratic } from "./algebra";
 import { solvePhysics } from "./physics";
 import { solveChemistry } from "./chemistry";
+import { solveBiology } from "./biology";
+import { solveGeography } from "./geography";
+import { solveLiterature } from "./literature";
+import { solveGovernment } from "./government";
+import { solveHistory } from "./history";
+import { solveEnglishLanguage } from "./english-language";
+import { solveCommerce } from "./commerce";
+import { solveICT } from "./ict";
 
 /**
  * Unified entry point to solve an academic question locally.
  * If solved, returns the solution and an explanation.
+ * Attempts solvers in order: STEM → Humanities → ICT.
  */
 export function solveQuestionLocally(question: string): SolverResult {
-  // 1. Try Physics (Ohm's law, F=ma, etc.)
+  // 1. Physics (Mechanics, Waves, Electricity, Optics, Thermodynamics)
   const physRes = solvePhysics(question);
   if (physRes.solved) return physRes;
 
-  // 2. Try Chemistry (moles n = m/M, etc.)
+  // 2. Chemistry (Atomic structure, Bonding, Stoichiometry, Organic, Kinetics)
   const chemRes = solveChemistry(question);
   if (chemRes.solved) return chemRes;
 
-  // 3. Try Quadratic Solver
+  // 3. Algebra (Quadratic & Linear equations)
   const quadRes = solveQuadratic(question);
   if (quadRes.solved) return quadRes;
 
-  // 4. Try Linear Solver
   const linRes = solveLinear(question);
   if (linRes.solved) return linRes;
+
+  // 4. Biology (Cell, Genetics, Ecology, Photosynthesis, Respiration, Reproduction)
+  const bioRes = solveBiology(question);
+  if (bioRes.solved) return bioRes;
+
+  // 5. Geography (Scale, Density, Coordinates, Biomes, Climate)
+  const geoRes = solveGeography(question);
+  if (geoRes.solved) return geoRes;
+
+  // 6. Literature (Devices, Themes, Characters, Plot structure)
+  const litRes = solveLiterature(question);
+  if (litRes.solved) return litRes;
+
+  // 7. Government/Civics (Taxation, Rights, Economics, GDP)
+  const govRes = solveGovernment(question);
+  if (govRes.solved) return govRes;
+
+  // 8. History (Chronology, Cause-Effect, Sources, Context)
+  const histRes = solveHistory(question);
+  if (histRes.solved) return histRes;
+
+  // 9. English Language (Grammar, Tenses, Composition, Mechanics)
+  const engRes = solveEnglishLanguage(question);
+  if (engRes.solved) return engRes;
+
+  // 10. Commerce (Profit/Loss, Discount, Interest, Break-even)
+  const commRes = solveCommerce(question);
+  if (commRes.solved) return commRes;
+
+  // 11. ICT (Hardware, Software, Programming, Networks, Security, Web Dev)
+  const ictRes = solveICT(question);
+  if (ictRes.solved) return ictRes;
 
   return { solved: false };
 }
